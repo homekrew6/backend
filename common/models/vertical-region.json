@@ -1,0 +1,26 @@
+{
+  "name": "VerticalRegion",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "fencing": {
+      "type": [
+        "geopoint"
+      ],
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "vertical": {
+      "type": "belongsTo",
+      "model": "Vertical",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
