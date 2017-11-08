@@ -1,5 +1,5 @@
 {
-  "name": "Vertical",
+  "name": "Zone",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -8,6 +8,12 @@
   "properties": {
     "name": {
       "type": "string",
+      "required": true
+    },
+    "fencing": {
+      "type": [
+        "geopoint"
+      ],
       "required": true
     }
   },
@@ -20,18 +26,6 @@
     }
   },
   "acls": [
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "READ",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
     {
       "accessType": "*",
       "principalType": "ROLE",
