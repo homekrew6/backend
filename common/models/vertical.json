@@ -17,6 +17,11 @@
       "type": "hasMany",
       "model": "VerticalRegion",
       "foreignKey": ""
+    },
+    "services": {
+      "type": "hasMany",
+      "model": "service",
+      "foreignKey": ""
     }
   },
   "acls": [
@@ -36,6 +41,12 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$authenticated",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
       "permission": "ALLOW"
     },
     {

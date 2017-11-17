@@ -66,5 +66,13 @@
   "Zone": {
     "dataSource": "mysql",
     "public": true
+  },
+  "service": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "serviceZone": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

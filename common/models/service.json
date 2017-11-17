@@ -1,5 +1,5 @@
 {
-  "name": "Zone",
+  "name": "service",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -9,23 +9,13 @@
     "name": {
       "type": "string",
       "required": true
-    },
-    "description": {
-      "type": "string",
-      "required": false
-    },
-    "fencing": {
-      "type": [
-        "geopoint"
-      ],
-      "required": true
     }
   },
   "validations": [],
   "relations": {
-    "verticalRegions": {
-      "type": "hasMany",
-      "model": "VerticalRegion",
+    "vertical": {
+      "type": "belongsTo",
+      "model": "Vertical",
       "foreignKey": ""
     },
     "serviceZones": {
@@ -35,12 +25,6 @@
     }
   },
   "acls": [
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW"
-    },
     {
       "accessType": "*",
       "principalType": "ROLE",
