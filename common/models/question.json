@@ -1,5 +1,5 @@
 {
-  "name": "service",
+  "name": "Question",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -9,33 +9,35 @@
     "name": {
       "type": "string",
       "required": true
+    },
+    "type": {
+      "type": "number",
+      "required": true
+    },
+    "parent_id": {
+      "type": "number",
+      "required": false
+    },
+    "option": {
+      "type": [
+        "object"
+      ]
     }
   },
   "validations": [],
   "relations": {
-    "vertical": {
+    "service": {
       "type": "belongsTo",
-      "model": "Vertical",
-      "foreignKey": ""
-    },
-    "serviceZones": {
-      "type": "hasMany",
-      "model": "serviceZone",
+      "model": "service",
       "foreignKey": ""
     },
     "questions": {
       "type": "hasMany",
       "model": "Question",
-      "foreignKey": ""
+      "foreignKey": "parent_id"
     }
   },
   "acls": [
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
     {
       "accessType": "*",
       "principalType": "ROLE",

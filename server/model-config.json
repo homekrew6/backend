@@ -74,5 +74,9 @@
   "serviceZone": {
     "dataSource": "mysql",
     "public": true
+  },
+  "Question": {
+    "dataSource": "mysql",
+    "public": true
   }
 }
