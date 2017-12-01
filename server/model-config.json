@@ -78,5 +78,21 @@
   "Question": {
     "dataSource": "mysql",
     "public": true
+  },
+  "Language": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Currency": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "testBool": {
+    "dataSource": "mysql",
+    "public": false
+  },
+  "ExexutionMethod": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

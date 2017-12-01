@@ -5,7 +5,24 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "cost_per_hour": {
+      "type": "number",
+      "required": false
+    },
+    "time_interval": {
+      "type": "number",
+      "required": false
+    },
+    "min_charge": {
+      "type": "number",
+      "required": false
+    },
+    "is_reoccur_able": {
+      "type": "boolean",
+      "required": false
+    }
+  },
   "validations": [],
   "relations": {
     "service": {

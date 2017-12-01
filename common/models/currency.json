@@ -1,0 +1,36 @@
+{
+  "name": "Currency",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "zones": {
+      "type": "hasMany",
+      "model": "Zone",
+      "foreignKey": ""
+    },
+    "services": {
+      "type": "hasMany",
+      "model": "service",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

@@ -14,6 +14,26 @@
       "type": "string",
       "required": false
     },
+    "premium": {
+      "type": "number",
+      "required": false
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "is_sec_pass": {
+      "type": "boolean"
+    },
+    "security_pasword": {
+      "type": "string"
+    },
+    "is_job_accept": {
+      "type": "boolean"
+    },
+    "level": {
+      "type": "number",
+      "required": true
+    },
     "fencing": {
       "type": [
         "geopoint"
@@ -31,6 +51,26 @@
     "serviceZones": {
       "type": "hasMany",
       "model": "serviceZone",
+      "foreignKey": ""
+    },
+    "currency": {
+      "type": "belongsTo",
+      "model": "Currency",
+      "foreignKey": ""
+    },
+    "language": {
+      "type": "belongsTo",
+      "model": "Language",
+      "foreignKey": ""
+    },
+    "zones": {
+      "type": "hasMany",
+      "model": "Zone",
+      "foreignKey": ""
+    },
+    "zone": {
+      "type": "belongsTo",
+      "model": "Zone",
       "foreignKey": ""
     }
   },

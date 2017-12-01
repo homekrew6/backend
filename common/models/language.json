@@ -1,0 +1,34 @@
+{
+  "name": "Language",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "direction": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "zones": {
+      "type": "hasMany",
+      "model": "Zone",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}
