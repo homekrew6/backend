@@ -22,6 +22,18 @@
       "type": [
         "object"
       ]
+    },
+    "icon": {
+      "type": "string",
+      "required": false
+    },
+    "color": {
+      "type": "string",
+      "required": false
+    },
+    "image": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],
@@ -35,6 +47,11 @@
       "type": "hasMany",
       "model": "Question",
       "foreignKey": "parent_id"
+    },
+    "answers": {
+      "type": "hasMany",
+      "model": "Answer",
+      "foreignKey": ""
     }
   },
   "acls": [

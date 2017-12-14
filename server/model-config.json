@@ -94,5 +94,9 @@
   "ExexutionMethod": {
     "dataSource": "mysql",
     "public": true
+  },
+  "Answer": {
+    "dataSource": "mysql",
+    "public": true
   }
 }
