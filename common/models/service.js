@@ -1,8 +1,8 @@
 'use strict';
 var aws = require('aws-sdk');
-var AWS_ACCESS_KEY = 'AKIAJQJ4KTHGYIBTD6KA'
-var AWS_SECRET_KEY = '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'
-var S3_BUCKET = 'petizenimages'
+var AWS_ACCESS_KEY = 'AKIAJQJ4KTHGYIB'
+var AWS_SECRET_KEY = '38LpQRHf4uTiE00kc2coD8Kr+YP2/uylhNy'
+var S3_BUCKET = 'sdfsf'
 module.exports = function(Service) {
   Service.getServiceById = function(id,cb){
     console.log(id);
