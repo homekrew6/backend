@@ -1,11 +1,11 @@
 'use strict';
 var aws = require('aws-sdk');
-var AWS_ACCESS_KEY = 'AKIAJQJ4KTHGYIB'
-var AWS_SECRET_KEY = '38LpQRHf4uTiE00kc2coD8Kr+YP2/uylhNy'
-var S3_BUCKET = 'sdfsf'
+var AWS_ACCESS_KEY = 'AKIAJUKBBDPNW5ED2M2A'
+var AWS_SECRET_KEY = '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'
+var S3_BUCKET = 'files.homekrew.com'
 module.exports = function(Service) {
   Service.getServiceById = function(id,cb){
-    console.log(id);
+    //console.log(id);
     //cb(null,id)
     var filter = {
       include: ['vertical', 'serviceZones']
@@ -29,7 +29,7 @@ module.exports = function(Service) {
     Service.uploadFile = function(serviceData,cb){
       //console.log(serviceData.name);
       serviceData.name = Math.floor((Math.random() * 100000000) + 1)+'_'+serviceData.name;
-      aws.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
+      aws.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY,region:'us-west-2'});
 
       var s3 = new aws.S3()
       var options = {
@@ -46,7 +46,7 @@ module.exports = function(Service) {
         }else{
           var resData = {
             signed_request: data,
-            url: 'https://s3-eu-west-1.amazonaws.com/' + S3_BUCKET + '/' + serviceData.name
+            url: 'https://s3-eu-central-1.amazonaws.com/'+ S3_BUCKET + '/' + serviceData.name
           }
           console.log(resData);
           cb(null, resData);

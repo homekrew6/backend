@@ -13,6 +13,9 @@
     "answer": {
       "type": "string",
       "required": true
+    },
+    "is_active": {
+      "type": "boolean"
     }
   },
   "validations": [],

@@ -98,5 +98,9 @@
   "Answer": {
     "dataSource": "mysql",
     "public": true
+  },
+  "Setting": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

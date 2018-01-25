@@ -19,9 +19,6 @@
     "option_price_impact": {
       "type": "string"
     },
-    "currency_id": {
-      "type": "number"
-    },
     "price_impact": {
       "type": "string"
     },

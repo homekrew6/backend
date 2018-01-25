@@ -49,6 +49,9 @@
     "banner_image": {
       "type": "string",
       "required": false
+    },
+    "is_active": {
+      "type": "boolean"
     }
   },
   "validations": [],

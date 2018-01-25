@@ -19,6 +19,9 @@
     },
     "location": {
       "type": "geopoint"
+    },
+    "is_active": {
+      "type": "boolean"
     }
   },
   "validations": [],
