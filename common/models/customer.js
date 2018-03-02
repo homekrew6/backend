@@ -1,15 +1,18 @@
 'use strict';
 var loopbackPassport = require('loopback-component-passport');
+
 module.exports = function(Customer) {
   Customer.editCustomer = function(id,customer,cb){
     customer.id = id;
     Customer.upsert( customer, function (err, res) {
+
         if(err){
           cb(err);
         }else{
           cb(null, res);
         }
 
+       
     });
   }
   Customer.remoteMethod('editCustomer', {
@@ -24,6 +27,7 @@ module.exports = function(Customer) {
           ],
             returns: {arg: 'customer', type: 'object'}
     });
+
 
     Customer.signup = function(customer,cb){
       var to = customer.email;

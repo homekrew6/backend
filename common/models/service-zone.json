@@ -28,12 +28,14 @@
     "service": {
       "type": "belongsTo",
       "model": "service",
+
       "foreignKey": "serviceId"
     },
     "zone": {
       "type": "belongsTo",
       "model": "Zone",
       "foreignKey": "zoneId"
+
     }
   },
   "acls": [
