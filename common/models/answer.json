@@ -1,0 +1,53 @@
+{
+  "name": "Answer",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "icon": {
+      "type": "string"
+    },
+    "image": {
+      "type": "string"
+    },
+    "option_price_impact": {
+      "type": "string"
+    },
+    "price_impact": {
+      "type": "string"
+    },
+    "option_time_impact": {
+      "type": "string"
+    },
+    "time_impact": {
+      "type": "string"
+    },
+    "parts": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "question": {
+      "type": "belongsTo",
+      "model": "Question",
+      "foreignKey": ""
+    },
+    "currency": {
+      "type": "belongsTo",
+      "model": "Currency",
+      "foreignKey": "questionId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

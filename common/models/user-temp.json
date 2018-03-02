@@ -1,0 +1,23 @@
+{
+  "name": "UserTemp",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "otp": {
+      "type": "number"
+    },
+    "email": {
+      "type": "string"
+    },
+    "access_token": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

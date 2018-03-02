@@ -1,0 +1,54 @@
+{
+  "name": "serviceZone",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "cost_per_hour": {
+      "type": "number",
+      "required": false
+    },
+    "time_interval": {
+      "type": "number",
+      "required": false
+    },
+    "min_charge": {
+      "type": "number",
+      "required": false
+    },
+    "is_reoccur_able": {
+      "type": "boolean",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {
+    "service": {
+      "type": "belongsTo",
+      "model": "service",
+      "foreignKey": "serviceId"
+    },
+    "zone": {
+      "type": "belongsTo",
+      "model": "Zone",
+      "foreignKey": "zoneId"
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

@@ -1,0 +1,105 @@
+{
+  "name": "service",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "cost_per_hour": {
+      "type": "number",
+      "required": false
+    },
+    "time_interval": {
+      "type": "number",
+      "required": false
+    },
+    "min_charge": {
+      "type": "number",
+      "required": false
+    },
+    "is_reoccur_able": {
+      "type": "boolean",
+      "required": false
+    },
+    "execution_method": {
+      "type": "number",
+      "required": false
+    },
+    "min_no_workers": {
+      "type": "number",
+      "required": false
+    },
+    "min_no_dedicated_workers": {
+      "type": "number",
+      "required": false
+    },
+    "icon_class": {
+      "type": "string",
+      "required": false
+    },
+    "color_code": {
+      "type": "string",
+      "required": false
+    },
+    "banner_image": {
+      "type": "string",
+      "required": false
+    },
+    "is_active": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "vertical": {
+      "type": "belongsTo",
+      "model": "Vertical",
+      "foreignKey": ""
+    },
+    "serviceZones": {
+      "type": "hasMany",
+      "model": "serviceZone",
+      "foreignKey": ""
+    },
+    "questions": {
+      "type": "hasMany",
+      "model": "Question",
+      "foreignKey": ""
+    },
+    "currency": {
+      "type": "belongsTo",
+      "model": "Currency",
+      "foreignKey": ""
+    },
+    "workerServices": {
+      "type": "hasMany",
+      "model": "WorkerService",
+      "foreignKey": ""
+    },
+    "jobs": {
+      "type": "hasMany",
+      "model": "Job",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

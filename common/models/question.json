@@ -1,0 +1,81 @@
+{
+  "name": "Question",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "number",
+      "required": true
+    },
+    "parent_id": {
+      "type": "number",
+      "required": false
+    },
+    "option": {
+      "type": [
+        "object"
+      ]
+    },
+    "icon": {
+      "type": "string",
+      "required": false
+    },
+    "color": {
+      "type": "string",
+      "required": false
+    },
+    "image": {
+      "type": "string",
+      "required": false
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "range_name": {
+      "type": "string",
+      "required": false
+    },
+    "start_range": {
+      "type": "number",
+      "required": false
+    },
+    "end_range": {
+      "type": "number",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {
+    "service": {
+      "type": "belongsTo",
+      "model": "service",
+      "foreignKey": ""
+    },
+    "questions": {
+      "type": "hasMany",
+      "model": "Question",
+      "foreignKey": "parent_id"
+    },
+    "answers": {
+      "type": "hasMany",
+      "model": "Answer",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

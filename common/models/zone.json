@@ -1,0 +1,112 @@
+{
+  "name": "Zone",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": false
+    },
+    "premium": {
+      "type": "number",
+      "required": false
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "is_sec_pass": {
+      "type": "boolean"
+    },
+    "security_pasword": {
+      "type": "string"
+    },
+    "is_job_accept": {
+      "type": "boolean"
+    },
+    "level": {
+      "type": "number",
+      "required": true
+    },
+    "fencing": {
+      "type": [
+        "geopoint"
+      ],
+      "required": true
+    },
+    "banner_image": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "verticalRegions": {
+      "type": "hasMany",
+      "model": "VerticalRegion",
+      "foreignKey": ""
+    },
+    "serviceZones": {
+      "type": "hasMany",
+      "model": "serviceZone",
+      "foreignKey": ""
+    },
+    "currency": {
+      "type": "belongsTo",
+      "model": "Currency",
+      "foreignKey": ""
+    },
+    "language": {
+      "type": "belongsTo",
+      "model": "Language",
+      "foreignKey": ""
+    },
+    "zones": {
+      "type": "hasMany",
+      "model": "Zone",
+      "foreignKey": ""
+    },
+    "zone": {
+      "type": "belongsTo",
+      "model": "Zone",
+      "foreignKey": ""
+    },
+    "workerLocations": {
+      "type": "hasMany",
+      "model": "WorkerLocation",
+      "foreignKey": ""
+    },
+    "jobs": {
+      "type": "hasMany",
+      "model": "Job",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}
