@@ -39,6 +39,10 @@
         "geopoint"
       ],
       "required": true
+    },
+    "banner_image": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
@@ -71,6 +75,16 @@
     "zone": {
       "type": "belongsTo",
       "model": "Zone",
+      "foreignKey": ""
+    },
+    "workerLocations": {
+      "type": "hasMany",
+      "model": "WorkerLocation",
+      "foreignKey": ""
+    },
+    "jobs": {
+      "type": "hasMany",
+      "model": "Job",
       "foreignKey": ""
     }
   },

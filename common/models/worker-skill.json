@@ -1,0 +1,24 @@
+{
+  "name": "WorkerSkill",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    },
+    "skill": {
+      "type": "belongsTo",
+      "model": "Skill",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

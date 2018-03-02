@@ -75,6 +75,16 @@
       "type": "belongsTo",
       "model": "Currency",
       "foreignKey": ""
+    },
+    "workerServices": {
+      "type": "hasMany",
+      "model": "WorkerService",
+      "foreignKey": ""
+    },
+    "jobs": {
+      "type": "hasMany",
+      "model": "Job",
+      "foreignKey": ""
     }
   },
   "acls": [

@@ -45,7 +45,7 @@
     "currency": {
       "type": "belongsTo",
       "model": "Currency",
-      "foreignKey": ""
+      "foreignKey": "questionId"
     }
   },
   "acls": [],

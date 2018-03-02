@@ -37,6 +37,20 @@
     },
     "is_active": {
       "type": "boolean"
+
+    },
+    "range_name": {
+      "type": "string",
+      "required": false
+    },
+    "start_range": {
+      "type": "number",
+      "required": false
+    },
+    "end_range": {
+      "type": "number",
+      "required": false
+
     }
   },
   "validations": [],

@@ -28,7 +28,14 @@
     "service": {
       "type": "belongsTo",
       "model": "service",
-      "foreignKey": ""
+
+      "foreignKey": "serviceId"
+    },
+    "zone": {
+      "type": "belongsTo",
+      "model": "Zone",
+      "foreignKey": "zoneId"
+
     }
   },
   "acls": [

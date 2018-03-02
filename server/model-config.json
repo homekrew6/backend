@@ -4,7 +4,8 @@
       "loopback/common/models",
       "loopback/server/models",
       "../common/models",
-      "./models"
+      "./models",
+      "../node_modules/loopback-component-passport/lib/models"
     ],
     "mixins": [
       "loopback/common/mixins",
@@ -100,6 +101,66 @@
     "public": true
   },
   "Setting": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "IntroSlider": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "container": {
+    "dataSource": "storage_s3",
+    "public": true
+  },
+  "asset": {
+    "dataSource": "db",
+    "public": true
+  },
+  "abcd": {
+    "dataSource": "storage",
+    "public": true
+  },
+  "demo": {
+    "dataSource": "storage",
+    "public": true
+  },
+  "EmailSend": {
+    "dataSource": "emailDataSource",
+    "public": true
+  },
+  "UserTemp": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "UserIdentity": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "UserCredential": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Skill": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "WorkerSkill": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "WorkerLocation": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "WorkerService": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "WorkerAvailability": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Job": {
     "dataSource": "mysql",
     "public": true
   }

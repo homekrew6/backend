@@ -12,7 +12,9 @@
     },
     "phone": {
       "type": "string",
-      "required": true
+
+      "required": false
+
     },
     "image": {
       "type": "string"
@@ -22,10 +24,24 @@
     },
     "is_active": {
       "type": "boolean"
+
+    },
+    "social_type": {
+      "type": "string"
+    },
+    "social_id": {
+      "type": "string"
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "jobs": {
+      "type": "hasMany",
+      "model": "Job",
+      "foreignKey": ""
+    }
+  },
+
   "acls": [
     {
       "accessType": "*",
@@ -62,6 +78,7 @@
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW"
+
     }
   ],
   "methods": {}

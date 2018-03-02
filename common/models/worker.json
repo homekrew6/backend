@@ -22,10 +22,40 @@
     },
     "is_active": {
       "type": "boolean"
+    },
+    "status": {
+      "type": "number",
+      "default": 0
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "workerSkills": {
+      "type": "hasMany",
+      "model": "WorkerSkill",
+      "foreignKey": ""
+    },
+    "workerLocations": {
+      "type": "hasMany",
+      "model": "WorkerLocation",
+      "foreignKey": ""
+    },
+    "workerServices": {
+      "type": "hasMany",
+      "model": "WorkerService",
+      "foreignKey": ""
+    },
+    "workerAvailabilities": {
+      "type": "hasMany",
+      "model": "WorkerAvailability",
+      "foreignKey": ""
+    },
+    "jobs": {
+      "type": "hasMany",
+      "model": "Job",
+      "foreignKey": ""
+    }
+  },
   "acls": [
     {
       "accessType": "*",
@@ -49,6 +79,24 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
       "permission": "ALLOW"
     }
   ],
