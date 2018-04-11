@@ -1,0 +1,31 @@
+{
+  "name": "Materials",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "price": {
+      "type": "string",
+      "required": true
+    },
+    "image": {
+      "type": "string",
+      "required": false
+    },
+    "is_active": {
+      "type": "boolean",
+      "required": false,
+      "default": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

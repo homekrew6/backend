@@ -1,0 +1,24 @@
+{
+  "name": "Workeravailabletiming",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "timings": {
+      "type": "array",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

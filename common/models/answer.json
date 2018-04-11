@@ -7,8 +7,7 @@
   },
   "properties": {
     "title": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "icon": {
       "type": "string"
@@ -33,6 +32,10 @@
     },
     "scope": {
       "type": "string"
+    },
+    "selected": {
+      "type": "boolean",
+      "required": false
     }
   },
   "validations": [],

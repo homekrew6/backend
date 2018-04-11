@@ -37,7 +37,6 @@
     },
     "is_active": {
       "type": "boolean"
-
     },
     "range_name": {
       "type": "string",
@@ -50,7 +49,26 @@
     "end_range": {
       "type": "number",
       "required": false
-
+    },
+    "IncrementId": {
+      "type": "number",
+      "required": false
+    },
+    "selectedRadio": {
+      "type": "string",
+      "required": false
+    },
+    "rangeValue": {
+      "type": "string",
+      "required": false
+    },
+    "sliderValues": {
+      "type": "string",
+      "required": false
+    },
+    "Status": {
+      "type": "boolean",
+      "required": false
     }
   },
   "validations": [],
@@ -68,6 +86,11 @@
     "answers": {
       "type": "hasMany",
       "model": "Answer",
+      "foreignKey": ""
+    },
+    "serviceQuestionAnswers": {
+      "type": "hasMany",
+      "model": "ServiceQuestionAnswer",
       "foreignKey": ""
     }
   },

@@ -1,0 +1,35 @@
+{
+  "name": "rating",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "IsWorkerSender": {
+      "type": "boolean",
+      "required": true
+    },
+    "ratingDate": {
+      "type": "date"
+    },
+    "rating": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "customer": {
+      "type": "belongsTo",
+      "model": "Customer",
+      "foreignKey": ""
+    },
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

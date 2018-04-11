@@ -1,0 +1,44 @@
+{
+  "name": "user-location",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "buildingName": {
+      "type": "string",
+      "required": true
+    },
+    "villa": {
+      "type": "string",
+      "required": true
+    },
+    "landmark": {
+      "type": "string",
+      "required": true
+    },
+    "latitude": {
+      "type": "string",
+      "required": true
+    },
+    "longitude": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "customer": {
+      "type": "belongsTo",
+      "model": "Customer",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

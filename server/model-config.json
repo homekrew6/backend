@@ -108,6 +108,10 @@
     "dataSource": "mysql",
     "public": true
   },
+  "cancelReason": {
+    "dataSource": "mysql",
+    "public": true
+  },
   "container": {
     "dataSource": "storage_s3",
     "public": true
@@ -140,6 +144,10 @@
     "dataSource": "mysql",
     "public": true
   },
+  "Materials": {
+    "dataSource": "mysql",
+    "public": true
+  },
   "Skill": {
     "dataSource": "mysql",
     "public": true
@@ -156,11 +164,43 @@
     "dataSource": "mysql",
     "public": true
   },
-  "WorkerAvailability": {
+  "Job": {
     "dataSource": "mysql",
     "public": true
   },
-  "Job": {
+  "ServiceQuestionAnswer": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "user-location": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "Workeravailabletiming": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "WorkerUnavailability": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "worker-payment": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "declinedJobs": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "rating": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "jobstartTime": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "jobMaterial": {
     "dataSource": "mysql",
     "public": true
   }

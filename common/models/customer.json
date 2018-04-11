@@ -12,9 +12,7 @@
     },
     "phone": {
       "type": "string",
-
       "required": false
-
     },
     "image": {
       "type": "string"
@@ -24,12 +22,14 @@
     },
     "is_active": {
       "type": "boolean"
-
     },
     "social_type": {
       "type": "string"
     },
     "social_id": {
+      "type": "string"
+    },
+    "deviceToken": {
       "type": "string"
     }
   },
@@ -41,7 +41,6 @@
       "foreignKey": ""
     }
   },
-
   "acls": [
     {
       "accessType": "*",
@@ -78,7 +77,12 @@
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW"
-
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
     }
   ],
   "methods": {}

@@ -1,0 +1,33 @@
+{
+  "name": "jobMaterial",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "count": {
+      "type": "number",
+      "required": true
+    },
+    "price": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "job": {
+      "type": "belongsTo",
+      "model": "Job",
+      "foreignKey": ""
+    },
+    "materials": {
+      "type": "belongsTo",
+      "model": "Materials",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

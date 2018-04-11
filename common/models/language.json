@@ -15,6 +15,9 @@
     },
     "is_active": {
       "type": "boolean"
+    },
+    "Code": {
+      "type": "string"
     }
   },
   "validations": [],

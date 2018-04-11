@@ -26,6 +26,14 @@
     "status": {
       "type": "number",
       "default": 0
+    },
+    "deviceToken": {
+      "type": "string",
+      "required": false
+    },
+    "isDedicated": {
+      "type": "boolean",
+      "default": "1"
     }
   },
   "validations": [],
@@ -47,7 +55,12 @@
     },
     "workerAvailabilities": {
       "type": "hasMany",
-      "model": "WorkerAvailability",
+      "model": "Workeravailabletiming",
+      "foreignKey": ""
+    },
+    "workerUnAvailabilities": {
+      "type": "hasMany",
+      "model": "WorkerUnavailability",
       "foreignKey": ""
     },
     "jobs": {

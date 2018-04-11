@@ -12,13 +12,7 @@
     }
   },
   "validations": [],
-  "relations": {
-    "workerSkills": {
-      "type": "hasMany",
-      "model": "WorkerSkill",
-      "foreignKey": ""
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": {}
 }

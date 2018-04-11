@@ -1,0 +1,42 @@
+{
+  "name": "worker-payment",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "bank_name": {
+      "type": "string",
+      "required": true
+    },
+    "account_number": {
+      "type": "string",
+      "required": true
+    },
+    "account_name": {
+      "type": "string",
+      "required": true
+    },
+    "swift_bic": {
+      "type": "string",
+      "required": true
+    },
+    "iban": {
+      "type": "string"
+    },
+    "selected": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

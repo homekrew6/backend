@@ -50,8 +50,15 @@
       "type": "string",
       "required": false
     },
+    "cover_image": {
+      "type": "string",
+      "required": false
+    },
     "is_active": {
       "type": "boolean"
+    },
+    "features": {
+      "type": "array"
     }
   },
   "validations": [],

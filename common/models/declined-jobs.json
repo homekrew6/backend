@@ -1,0 +1,38 @@
+{
+  "name": "declinedJobs",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "status": {
+      "type": "string",
+      "required": false
+    },
+    "reason": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {
+    "job": {
+      "type": "belongsTo",
+      "model": "Job",
+      "foreignKey": ""
+    },
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    },
+    "service": {
+      "type": "belongsTo",
+      "model": "service",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

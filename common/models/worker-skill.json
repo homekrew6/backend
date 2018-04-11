@@ -13,9 +13,9 @@
       "model": "Worker",
       "foreignKey": ""
     },
-    "skill": {
+    "service": {
       "type": "belongsTo",
-      "model": "Skill",
+      "model": "service",
       "foreignKey": ""
     }
   },

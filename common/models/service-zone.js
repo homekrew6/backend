@@ -1,10 +1,8 @@
 'use strict';
 
 module.exports = function(Servicezone) {
-
   Servicezone.getZoneRelatedService = function(zone,cb){
-    console.log(zone);
-    Servicezone.find({where: {zoneId: zone.id},include: ["service","zone"]}, function(err, res) {
+    Servicezone.find({where: {zoneId: zone.zone},include: ["service","zone"]}, function(err, res) {
         if(!err){
           cb(null,res);
 
@@ -24,5 +22,4 @@ module.exports = function(Servicezone) {
       ],
         returns: {arg: 'response', type: 'object'}
     });
-
 };

@@ -2,7 +2,6 @@
 
 module.exports = function(Introslider) {
   Introslider.getSliders = function(iconslider,cb){
-    console.log(iconslider);
     Introslider.find({where: {type: iconslider.type}}, function(err, res) {
         if(!err){
           cb(null,res);
