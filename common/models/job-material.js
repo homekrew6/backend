@@ -4,8 +4,7 @@ module.exports = function (Jobmaterial) {
     Jobmaterial.insertJobMaterial = function (data, cb) {
         var response = {};
         var entryData = [];
-        if(data['materials'])
-        {
+        if (data['materials']) {
             for (var i = 0; i < data['materials'].length; i++) {
 
                 let insertData = { "count": data['materials'][i].count, "price": data['materials'][i].price, "jobId": data.jobId, "materialsId": data['materials'][i].materialsId };
@@ -24,18 +23,17 @@ module.exports = function (Jobmaterial) {
                         cb(null, response);
                     }
                     response.type = "success";
-                    response.message = "success";
+                    response.message = res;
                     cb(null, response);
                 });
             })
         }
-        else
-        {
+        else {
             response.type = "error";
             response.message = "Plesae give proper data.";
             cb(null, response);
         }
-       
+
 
 
 
@@ -54,4 +52,36 @@ module.exports = function (Jobmaterial) {
         ],
         returns: { arg: 'response', type: 'object' }
     });
+
+
+    Jobmaterial.getJobMaterialByJobId = function (data, cb) {
+        var response = {};
+        Jobmaterial.find({ where: { jobId: data.jobId }, include: ["materials"] }, (err, res) => {
+            if (err) {
+                response.type = "Error";
+                response.message = err;
+                cb(null, response);
+            }
+            else {
+                response.type = "Success";
+                response.message = res;
+                cb(null, response);
+            }
+        })
+    }
+
+    Jobmaterial.remoteMethod('getJobMaterialByJobId', {
+        http: { path: '/getJobMaterialByJobId', verb: 'post' },
+        accepts: [
+            {
+                arg: 'data',
+                type: 'object',
+                http: { source: 'body' }
+            }
+        ],
+        returns: { arg: 'response', type: 'object' }
+    });
+
+
+
 };

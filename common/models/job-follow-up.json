@@ -1,0 +1,70 @@
+{
+    "name": "jobFollowUp",
+    "base": "PersistedModel",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
+    },
+    "properties": {
+        "jobStartTime": {
+            "type": "string"
+        },
+        "jobEndTime": {
+            "type": "string"
+        },
+        "price": {
+            "type": "string"
+        },
+        "followUpDate": {
+            "type": "string"
+        },
+        "hours": {
+            "type": "number"
+        }
+    },
+    "validations": [],
+    "relations": {
+        "job": {
+            "type": "belongsTo",
+            "model": "Job",
+            "foreignKey": ""
+        },
+        "customer": {
+            "type": "belongsTo",
+            "model": "Customer",
+            "foreignKey": ""
+        },
+        "worker": {
+            "type": "belongsTo",
+            "model": "Worker",
+            "foreignKey": ""
+        },
+        "currency": {
+            "type": "belongsTo",
+            "model": "Currency",
+            "foreignKey": ""
+        },
+        "zone": {
+            "type": "belongsTo",
+            "model": "Zone",
+            "foreignKey": ""
+        },
+        "service": {
+            "type": "belongsTo",
+            "model": "service",
+            "foreignKey": ""
+        },
+        "userLocation": {
+            "type": "belongsTo",
+            "model": "user-location",
+            "foreignKey": ""
+        },
+        "jobMaterial": {
+            "type": "belongsTo",
+            "model": "jobMaterial",
+            "foreignKey": ""
+        }
+    },
+    "acls": [],
+    "methods": {}
+}

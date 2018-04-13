@@ -1,0 +1,24 @@
+{
+  "name": "favoriteSp",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "customer": {
+      "type": "belongsTo",
+      "model": "Customer",
+      "foreignKey": ""
+    },
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

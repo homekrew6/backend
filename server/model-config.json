@@ -203,5 +203,17 @@
   "jobMaterial": {
     "dataSource": "mysql",
     "public": true
+  },
+  "jobFollowUp": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "favoriteSp": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "jobTrackerStatus": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

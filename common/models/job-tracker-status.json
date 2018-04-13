@@ -1,26 +1,22 @@
 {
-  "name": "Setting",
+  "name": "jobTrackerStatus",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "site_name": {
+    "jobId": {
       "type": "string"
     },
-    "site_email": {
+    "status": {
       "type": "string"
     },
-    "address": {
+    "statusChangeddate": {
       "type": "string"
     },
-    "phone": {
-      "type": "string"
-    },
-    "minimumPostingDiff": {
-      "type": "number",
-      "required": false
+    "is_active": {
+      "type": "boolean"
     }
   },
   "validations": [],
