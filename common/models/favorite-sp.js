@@ -34,17 +34,35 @@ module.exports = function (Favoritesp) {
                                         body: "You have been added as Favourite SP."
                                     }
                                 };
-                                fcm.send(message, function (err, fcmResponse) {
-                                    if (err) {
-                                        response.type = "Error";
-                                        response.message = err;
-                                        cb(null, response);
-                                    } else {
-                                        response.type = "Success";
-                                        response.message = "Successfully added in the favourite list.";
+                                const notificationInsertData = { notificationType: "FavSp", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.workerId, jobId: '', IsToWorker: true, IsRead: 0 };
+                                Favoritesp.app.models.Notifications.create(notificationInsertData, (finalError, finalSuccess)=>{
+                                    if(finalError)
+                                    {
+                                        response.type="Error";
+                                        response.message=finalError;
                                         cb(null, response);
                                     }
-                                });
+                                    else{
+                                        fcm.send(message, function (err, fcmResponse) {
+                                            if (err) {
+                                                response.type = "Success";
+                                                response.message = "Successfully added in the favourite list.";
+                                                cb(null, response);
+                                            } else {
+                                                response.type = "Success";
+                                                response.message = "Successfully added in the favourite list.";
+                                                cb(null, response);
+                                            }
+                                        });
+                                    }
+                                })
+                               
+                            }
+                            else
+                            {
+                                response.type = "Success";
+                                response.message = "Successfully added in the favourite list.";
+                                cb(null, response);
                             }
                         }
                     })

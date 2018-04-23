@@ -1,70 +1,73 @@
 {
-    "name": "jobFollowUp",
-    "base": "PersistedModel",
-    "idInjection": true,
-    "options": {
-        "validateUpsert": true
+  "name": "jobFollowUp",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "jobStartTime": {
+      "type": "string"
     },
-    "properties": {
-        "jobStartTime": {
-            "type": "string"
-        },
-        "jobEndTime": {
-            "type": "string"
-        },
-        "price": {
-            "type": "string"
-        },
-        "followUpDate": {
-            "type": "string"
-        },
-        "hours": {
-            "type": "number"
-        }
+    "jobEndTime": {
+      "type": "string"
     },
-    "validations": [],
-    "relations": {
-        "job": {
-            "type": "belongsTo",
-            "model": "Job",
-            "foreignKey": ""
-        },
-        "customer": {
-            "type": "belongsTo",
-            "model": "Customer",
-            "foreignKey": ""
-        },
-        "worker": {
-            "type": "belongsTo",
-            "model": "Worker",
-            "foreignKey": ""
-        },
-        "currency": {
-            "type": "belongsTo",
-            "model": "Currency",
-            "foreignKey": ""
-        },
-        "zone": {
-            "type": "belongsTo",
-            "model": "Zone",
-            "foreignKey": ""
-        },
-        "service": {
-            "type": "belongsTo",
-            "model": "service",
-            "foreignKey": ""
-        },
-        "userLocation": {
-            "type": "belongsTo",
-            "model": "user-location",
-            "foreignKey": ""
-        },
-        "jobMaterial": {
-            "type": "belongsTo",
-            "model": "jobMaterial",
-            "foreignKey": ""
-        }
+    "price": {
+      "type": "string"
     },
-    "acls": [],
-    "methods": {}
+    "followUpDate": {
+      "type": "string"
+    },
+    "hours": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "job": {
+      "type": "belongsTo",
+      "model": "Job",
+      "foreignKey": ""
+    },
+    "customer": {
+      "type": "belongsTo",
+      "model": "Customer",
+      "foreignKey": ""
+    },
+    "worker": {
+      "type": "belongsTo",
+      "model": "Worker",
+      "foreignKey": ""
+    },
+    "currency": {
+      "type": "belongsTo",
+      "model": "Currency",
+      "foreignKey": ""
+    },
+    "zone": {
+      "type": "belongsTo",
+      "model": "Zone",
+      "foreignKey": ""
+    },
+    "service": {
+      "type": "belongsTo",
+      "model": "service",
+      "foreignKey": ""
+    },
+    "userLocation": {
+      "type": "belongsTo",
+      "model": "user-location",
+      "foreignKey": ""
+    },
+    "jobMaterial": {
+      "type": "belongsTo",
+      "model": "jobMaterial",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
 }

@@ -11,7 +11,7 @@ module.exports = function (Workerskill) {
                 let insertData = { "workerId": data.workerId, "serviceId": data['serviceIds'][i] };
                 entryData.push(insertData);
             }
-            console.log(entryData);
+            
             Workerskill.remove({ "workerId": data.workerId }, (err1, res1) => {
                 if (err1) {
                     response.type = "error";

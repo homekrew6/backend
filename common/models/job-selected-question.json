@@ -1,18 +1,14 @@
 {
-  "name": "jobMaterial",
+  "name": "jobSelectedQuestion",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "count": {
-      "type": "number",
-      "required": true
-    },
-    "price": {
+    "questionList": {
       "type": "string",
-      "required": false
+      "length": 5000
     }
   },
   "validations": [],
@@ -20,11 +16,6 @@
     "job": {
       "type": "belongsTo",
       "model": "Job",
-      "foreignKey": ""
-    },
-    "materials": {
-      "type": "belongsTo",
-      "model": "Materials",
       "foreignKey": ""
     }
   },

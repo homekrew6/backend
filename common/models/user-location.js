@@ -2,7 +2,7 @@
 
 module.exports = function (Userlocation) {
     Userlocation.searchLocation = function (keyword, cb) {
-        console.log(keyword);
+       
         Userlocation.find({ where: { "buildingName": keyword } }, function (err, res) {
             if (!err) {
                 cb(null, res);

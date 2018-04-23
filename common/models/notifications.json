@@ -1,27 +1,39 @@
 {
-  "name": "Materials",
+  "name": "Notifications",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "name": {
+    "notificationType": {
       "type": "string",
       "required": true
     },
-    "price": {
+    "notificationDate": {
+      "type": "date",
+      "required": false
+    },
+    "title": {
       "type": "string",
       "required": false
     },
-    "image": {
+    "sentIds": {
       "type": "string",
       "required": false
     },
-    "is_active": {
+    "jobId": {
+      "type": "string",
+      "required": false
+    },
+    "IsToWorker": {
+      "type": "boolean",
+      "required": false
+    },
+    "IsRead": {
       "type": "boolean",
       "required": false,
-      "default": true
+      "default": 0
     }
   },
   "validations": [],

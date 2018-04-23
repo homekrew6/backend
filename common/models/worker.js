@@ -44,7 +44,7 @@ module.exports = function (Worker) {
         {
           Worker.create(worker, function (err, res) {
             Worker.app.models.Customer.sendEmail(to, subject, text, html, function (cb) {
-              console.log(cb.success);
+              
             });
             cb(null, res);
           });
@@ -87,8 +87,7 @@ module.exports = function (Worker) {
   });
 
   Worker.on('resetPasswordRequest', function (info) {
-    console.log(info.email); // the email of the requested user
-    console.log(info.accessToken.id); // the temp access token to allow password reset
+   
 
     var to = info.email;
     var acces_token = info.accessToken.id;
@@ -103,7 +102,7 @@ module.exports = function (Worker) {
     }
     Worker.app.models.UserTemp.upsert(temp, function (err, res) {
       Worker.app.models.Customer.sendEmail(to, subject, text, html, function (cb) {
-        console.log(cb.success);
+        
       });
     });
   });

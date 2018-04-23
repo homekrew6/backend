@@ -15,7 +15,6 @@ module.exports = function (Question) {
 
       return empl;
     }).catch(function (err) {
-      console.log(err);
     });
   }
   Question.remoteMethod('getQuestions', {
@@ -32,8 +31,7 @@ module.exports = function (Question) {
 
   Question.observe('after save', function (ctx, next) {
     if (ctx.instance) {
-      console.log('Saved %s#%s', ctx.Model.modelName, ctx.instance.id);
-      console.log('Instance data', ctx.instance);
+    
       if (ctx.instance.type == 1 || ctx.instance.type == 2 || ctx.instance.type == 4)
 
       {
@@ -55,9 +53,9 @@ module.exports = function (Question) {
   
           }, function (err, models) {
             if (err) {
-              console.log(err);
+             
             } else {
-              console.log("success in saving answer");
+            
             }
           });
         }
@@ -78,9 +76,9 @@ module.exports = function (Question) {
   
           }, function (err, models) {
             if (err) {
-              console.log(err);
+            
             } else {
-              console.log("success in saving answer");
+             
             }
           });
         }
@@ -90,10 +88,7 @@ module.exports = function (Question) {
 
 
     } else {
-      console.log('Updated %s matching %j',
-        ctx.Model.pluralModelName,
-        ctx.where
-      );
+      
     }
     next();
   });

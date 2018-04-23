@@ -12,7 +12,7 @@ module.exports = function(Zone) {
 
      return empl;
    }).catch(function(err) {
-     console.log(err);
+    
    });
   }
   Zone.remoteMethod('getParentZone', {

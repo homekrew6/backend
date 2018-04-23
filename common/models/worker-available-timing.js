@@ -245,8 +245,7 @@ module.exports = function (Workeravailabletiming) {
                                     }
                                     availableDay.push(pushData);
                                 }
-
-
+                               
                                 for (var i = 0; i < availableDay.length; i++) {
                                     for (var j = 0; j < availableDay[i].timings.length; j++) {
                                         if (availableDay[i].timings[j].time == requestData.time) {
@@ -333,7 +332,7 @@ module.exports = function (Workeravailabletiming) {
             registration_ids: data.to,
             data: {
                 "screenType": "JobDetails",
-                "jobId": "37"
+                "jobId": "153"
             },
             notification: {
                 title: "Your Job is being accepted.",

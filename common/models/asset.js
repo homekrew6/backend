@@ -52,7 +52,7 @@ module.exports = function(Asset) {
 
     Promise.all([filePromise, fieldsPromise])
     .then(([fileInfo, fields]) => {
-      console.log(fileInfo);
+    
         // S3 file url
         // const url = (fileInfo.providerResponse && fileInfo.providerResponse.location);
         // Asset.create(Object.assign({

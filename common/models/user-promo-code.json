@@ -1,30 +1,26 @@
 {
-  "name": "jobMaterial",
+  "name": "userPromoCode",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "count": {
-      "type": "number",
-      "required": true
-    },
-    "price": {
-      "type": "string",
+    "addedDate": {
+      "type": "date",
       "required": false
     }
   },
   "validations": [],
   "relations": {
-    "job": {
+    "customer": {
       "type": "belongsTo",
-      "model": "Job",
+      "model": "Customer",
       "foreignKey": ""
     },
-    "materials": {
+    "promotions": {
       "type": "belongsTo",
-      "model": "Materials",
+      "model": "promotions",
       "foreignKey": ""
     }
   },

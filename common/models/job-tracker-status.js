@@ -3,7 +3,7 @@
 module.exports = function(Jobtrackerstatus) {
     Jobtrackerstatus.getJobTrackingDetailsById = function (data, cb) {
         var response = {};
-        Jobtrackerstatus.find({jobId:data.id}, (err, success)=>{
+        Jobtrackerstatus.find({ where: { jobId: data.jobId}}, (err, success)=>{
             if(err)
             {
                 response.type="Error";

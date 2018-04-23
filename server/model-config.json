@@ -215,5 +215,33 @@
   "jobTrackerStatus": {
     "dataSource": "mysql",
     "public": true
+  },
+  "Notifications": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "jobSelectedQuestion": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "promotions": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "promotionsService": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "promotionsCustomer": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "userPromoCode": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "payment": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

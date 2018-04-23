@@ -69,6 +69,11 @@
     "Status": {
       "type": "boolean",
       "required": false
+    },
+    "isSlided": {
+      "type": "string",
+      "required": false,
+      "default": "false"
     }
   },
   "validations": [],
