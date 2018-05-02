@@ -7,7 +7,7 @@
   },
   "properties": {
     "price": {
-      "type": "number"
+      "type": "string"
     },
     "postedDate": {
       "type": "string",
@@ -42,6 +42,9 @@
     "expectedTimeInterval": {
       "type": "number",
       "required": false
+    },
+    "promoPrice": {
+      "type": "string"
     }
   },
   "validations": [],

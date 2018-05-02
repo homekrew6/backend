@@ -1,24 +1,12 @@
 {
-  "name": "payment",
+  "name": "promoLog",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "paymentDate": {
-      "type": "date"
-    },
-    "status": {
-      "type": "string"
-    },
-    "message": {
-      "type": "string"
-    },
-    "amount": {
-      "type": "string"
-    },
-    "transactionCode": {
+    "price": {
       "type": "string"
     }
   },
@@ -29,9 +17,9 @@
       "model": "Customer",
       "foreignKey": ""
     },
-    "job": {
+    "promotions": {
       "type": "belongsTo",
-      "model": "Job",
+      "model": "promotions",
       "foreignKey": ""
     }
   },

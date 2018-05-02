@@ -27,7 +27,7 @@ module.exports = function (Favoritesp) {
                                 var message = {
                                     to: res.deviceToken,
                                     data: {
-                                        "screenType": "AvailableJobs"
+                                        "screenType": "Menu"
                                     },
                                     notification: {
                                         title: "You have been added as Favourite SP.",

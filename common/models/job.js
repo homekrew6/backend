@@ -17,7 +17,7 @@ module.exports = function (Job) {
 
         var response = {};
         const postingTime = new Date();
-        let insertData = { price: data.price, postedDate: new Date(data.postedDate).toUTCString(), payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval };
+        let insertData = { price: data.price, postedDate: new Date(data.postedDate).toUTCString(), payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval, promoPrice: data.promoPrice };
         Job.create(insertData, (err, res) => {
             if (err) {
                 response.type = "Error";
@@ -101,110 +101,134 @@ module.exports = function (Job) {
                                             var data1 = { "workerId": res[i].workerId };
                                             workerIds.push(data1);
                                         }
-                                        var registrationIds = [];
-                                        var filter = '"where":{"or":' + workerIds + '}';
-                                        Job.app.models.Worker.find({ "where": { "or": workerIds } }, (error, success) => {
-                                            if (error) {
+                                        Job.app.models.WorkerLocation.find({ "where": { "or": workerIds } }, (locationError, locationSuccess) => {
+                                            if (locationError) {
                                                 response.type = "error";
-                                                response.message = error;
+                                                response.message = locationError;
                                                 cb(null, response);
                                             }
-                                            var fullWokerList = [];
-                                            fullWokerList = success;
-                                            var filter = '{"where":{"or":' + workerIds + '}}';
-                                            Job.app.models.Workeravailabletiming.find({ filter }, (err1, res1) => {
-                                                if (err1) {
-                                                    response.type = "error";
-                                                    response.message = err1;
-                                                    cb(null, response);
+                                            else {
+                                                var completeLocationWorkerList = [];
+                                                for (let i = 0; i < locationSuccess.length; i++) {
+                                                    if (locationSuccess[i].zoneId == data.zoneId) {
+                                                        var data1 = { "workerId": locationSuccess[i].workerId };
+                                                        completeLocationWorkerList.push(data1);
+                                                    }
                                                 }
-                                                if (res1.length > 0) {
-                                                    var workersList = [];
-                                                    let finalWorkerIds = [];
-                                                    var availableDay = [];
-                                                    for (var i = 0; i < res1.length; i++) {
-                                                        let pushData = { workerId: res1[i].workerId, timings: [] };
-                                                        if (res1[i].timings) {
-                                                            for (var j = 0; j < res1[i].timings.length; j++) {
-
-                                                                if (res1[i].timings[j][data.saveDbDay] == true) {
-                                                                    pushData.timings.push(res1[i].timings[j]);
-                                                                }
-                                                            }
-                                                        }
-                                                        availableDay.push(pushData);
+                                                var registrationIds = [];
+                                                var filter = '"where":{"or":' + completeLocationWorkerList + '}';
+                                                Job.app.models.Worker.find({ "where": { "or": completeLocationWorkerList } }, (error, success) => {
+                                                    if (error) {
+                                                        response.type = "error";
+                                                        response.message = error;
+                                                        cb(null, response);
                                                     }
-                                                    for (var i = 0; i < availableDay.length; i++) {
-                                                        for (var j = 0; j < availableDay[i].timings.length; j++) {
-                                                            if (availableDay[i].timings[j].time == data.saveDBTime) {
-                                                                finalWorkerIds.push(availableDay[i].workerId);
-                                                            }
-                                                        }
-                                                    }
-                                                    let toSentIds = [];
-                                                    for (var i = 0; i < fullWokerList.length; i++) {
-                                                        if (finalWorkerIds.includes(fullWokerList[i].id)) {
-                                                            fullWokerList[i].IsAvailable = true;
-                                                            if (fullWokerList[i].deviceToken)
-                                                                registrationIds.push(fullWokerList[i].deviceToken);
-                                                            toSentIds.push(fullWokerList[i].id);
-                                                        }
-                                                        else {
-                                                            fullWokerList[i].IsAvailable = false;
-                                                        }
-                                                    }
-
-
-                                                    // response.type = "success";
-                                                    // response.list = fullWokerList;
-                                                    // cb(null, response);
-                                                    var message = {
-                                                        registration_ids: registrationIds,
-                                                        data: {
-                                                            "screenType": "AvailableJobs"
-                                                        },
-                                                        notification: {
-                                                            title: "New job posted.",
-                                                            body: "You have a new job request."
-                                                        }
-                                                    };
-                                                    var entryData = [];
-                                                    for (var k = 0; k < toSentIds.length; k++) {
-                                                        let insertData = { notificationType: "NewJob", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: toSentIds[k], jobId: res.id ? res.id : '', IsToWorker: true, IsRead: 0 };
-                                                        entryData.push(insertData);
-                                                    }
-
-                                                    Job.app.models.Notifications.create(entryData, (finalError2, finalSuccess2) => {
-                                                        if (finalError2) {
-                                                            response.type = "Error";
-                                                            response.message = finalError2;
+                                                    var fullWokerList = [];
+                                                    fullWokerList = success;
+                                                    var filter = '{"where":{"or":' + completeLocationWorkerList + '}}';
+                                                    Job.app.models.Workeravailabletiming.find({ filter }, (err1, res1) => {
+                                                        if (err1) {
+                                                            response.type = "error";
+                                                            response.message = err1;
                                                             cb(null, response);
                                                         }
-                                                        else {
-                                                            fcm.send(message, function (err, fcmResponse) {
-                                                                if (err) {
-                                                                    response.type = "success";
-                                                                    response.message = "Job posted successfully.";
-                                                                    cb(null, response);
-                                                                } else {
-                                                                    response.type = "success";
-                                                                    response.message = "Job posted successfully.";
+                                                        if (res1.length > 0) {
+                                                            var workersList = [];
+                                                            let finalWorkerIds = [];
+                                                            var availableDay = [];
+                                                            for (var i = 0; i < res1.length; i++) {
+                                                                let pushData = { workerId: res1[i].workerId, timings: [] };
+                                                                if (res1[i].timings) {
+                                                                    for (var j = 0; j < res1[i].timings.length; j++) {
+
+                                                                        if (res1[i].timings[j][data.saveDbDay] == true) {
+                                                                            pushData.timings.push(res1[i].timings[j]);
+                                                                        }
+                                                                    }
+                                                                }
+                                                                availableDay.push(pushData);
+                                                            }
+                                                            for (var i = 0; i < availableDay.length; i++) {
+                                                                for (var j = 0; j < availableDay[i].timings.length; j++) {
+                                                                    if (availableDay[i].timings[j].time == data.saveDBTime) {
+                                                                        finalWorkerIds.push(availableDay[i].workerId);
+                                                                    }
+                                                                }
+                                                            }
+                                                            let toSentIds = [];
+                                                            for (var i = 0; i < fullWokerList.length; i++) {
+                                                                if (finalWorkerIds.includes(fullWokerList[i].id)) {
+                                                                    fullWokerList[i].IsAvailable = true;
+                                                                    if (fullWokerList[i].deviceToken && !fullWokerList[i].isDedicated) {
+                                                                        registrationIds.push(fullWokerList[i].deviceToken);
+                                                                        toSentIds.push(fullWokerList[i].id);
+                                                                    }
+
+                                                                    
+                                                                }
+                                                               
+                                                                else {
+                                                                    fullWokerList[i].IsAvailable = false;
+                                                                }
+                                                            }
+                                                           
+
+                                                            
+                                                            // response.type = "success";
+                                                            // response.list = fullWokerList;
+                                                            // cb(null, response);
+                                                            console.log("registrationIds", registrationIds)
+                                                            console.log("toSentIds", toSentIds)
+                                                            var message = {
+                                                                registration_ids: registrationIds,
+                                                                data: {
+                                                                    "screenType": "AvailableJobs"
+                                                                },
+                                                                notification: {
+                                                                    title: "New job posted.",
+                                                                    body: "You have a new job request."
+                                                                }
+                                                            };
+                                                            var entryData = [];
+                                                            for (var k = 0; k < toSentIds.length; k++) {
+                                                                let insertData = { notificationType: "NewJob", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: toSentIds[k], jobId: res.id ? res.id : '', IsToWorker: true, IsRead: 0 };
+                                                                entryData.push(insertData);
+                                                            }
+
+                                                            Job.app.models.Notifications.create(entryData, (finalError2, finalSuccess2) => {
+                                                                if (finalError2) {
+                                                                    response.type = "Error";
+                                                                    response.message = finalError2;
                                                                     cb(null, response);
                                                                 }
-                                                            });
+                                                                else {
+                                                                    fcm.send(message, function (err, fcmResponse) {
+                                                                        if (err) {
+                                                                            response.type = "success";
+                                                                            response.message = "Job posted successfully.";
+                                                                            cb(null, response);
+                                                                        } else {
+                                                                            response.type = "success";
+                                                                            response.message = "Job posted successfully.";
+                                                                            cb(null, response);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            })
+
                                                         }
-                                                    })
 
-                                                }
+                                                        else {
+                                                            response.type = "error";
+                                                            response.message = "Job posted but No timings available for Service providers";
+                                                            cb(null, response);
+                                                        }
 
-                                                else {
-                                                    response.type = "error";
-                                                    response.message = "Job posted but No timings available for Service providers";
-                                                    cb(null, response);
-                                                }
-
-                                            });
+                                                    });
+                                                })
+                                            }
                                         })
+
 
 
                                     }
@@ -293,7 +317,7 @@ module.exports = function (Job) {
 
                                         }
                                         for (let j = 0; j < res2.length; j++) {
-                                            if (res2[j].status == "ACCEPTED" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
+                                            if (res2[j].status == "ACCEPTED" || res2[j].status == "PAYPENDING" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
                                                 let index;
                                                 for (let k = 0; k < jobs.declinedJobs.length; k++) {
                                                     if (jobs.declinedJobs[k].jobId == res2[j].id && jobs.declinedJobs[k].workerId == res2[j].workerId) {
@@ -333,7 +357,7 @@ module.exports = function (Job) {
                                     }
                                     else {
                                         for (let i = 0; i < res2.length; i++) {
-                                            if (res2[i].status == "ACCEPTED" || res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP") {
+                                            if (res2[i].status == "ACCEPTED" || res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
                                                 jobs.acceptedJobs.push(res2[i]);
                                             }
                                         }
@@ -1462,7 +1486,7 @@ module.exports = function (Job) {
 
     Job.getJobListingForAdmin = function (cb) {
         var response = {};
-        Job.find({ include: ["customer", "worker", "service", "currency"] }, (err, res) => {
+        Job.find({ include: ["customer", "worker", "service", "currency", "zone"] }, (err, res) => {
             if (err) {
                 response.type = "Error";
                 response.message = err;
@@ -1638,7 +1662,7 @@ module.exports = function (Job) {
                 }
             })
         }
-        else if (data.status == "ACCEPTED" || data.status == "FOLLOWEDUP" || data.status == "COMPLETED" || data.status == "STARTED" || data.status == "ONMYWAY" || data.status == "JOBSTARTED") {
+        else if (data.status == "ACCEPTED" || data.status == "FOLLOWEDUP" || data.status == "COMPLETED" || data.status == "STARTED" || data.status == "ONMYWAY" || data.status == "JOBSTARTED" || data.status == "PAYPENDING") {
             Job.find({ "where": { "customerId": data.customerId, "status": data.status }, include: ["service", "userLocation", "worker", "currency"], "order": "id DESC" }, (err, res) => {
                 if (err) {
                     response.type = "Error";
@@ -1760,7 +1784,7 @@ module.exports = function (Job) {
             }
             else {
 
-                Job.app.models.Customer.findById(data.customerId, (err1, res1) => {
+                Job.app.models.Worker.findById(data.workerId, (err1, res1) => {
                     if (err1) {
                         response.type = "Error";
                         response.message = err1;
@@ -1772,7 +1796,7 @@ module.exports = function (Job) {
                                 to: res1.deviceToken,
                                 data: {
                                     "screenType": "JobDetails",
-                                    "jobId":data.id
+                                    "jobId": data.id
                                 },
                                 notification: {
                                     title: "Your job is completed",
@@ -1781,7 +1805,7 @@ module.exports = function (Job) {
                             };
                             let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
                             Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
-                                fcm1.send(message, function (err, fcmResponse) {
+                                fcm.send(message, function (err, fcmResponse) {
                                     if (err) {
                                         response.type = "error";
                                         response.message = err;
@@ -1820,10 +1844,25 @@ module.exports = function (Job) {
                                                     }
                                                     price = finalCost;
                                                 }
-                                                response.type = "success";
-                                                response.message = "Job completed successfully.";
-                                                response.price = price;
-                                                cb(null, response);
+
+                                                Job.app.models.jobTrackerStatus.update({ jobId: data.id, is_active: 0 }, (statusError, statusSuccess) => {
+                                                    if (statusError) {
+                                                        response.type = "Error";
+                                                        response.message = "Error in updating job status.";
+                                                        response.price = price;
+                                                        cb(null, response);
+                                                    }
+                                                    else {
+                                                        let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                                                        Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+                                                            response.type = "Success";
+                                                            response.message = "Job Completed.";
+                                                            response.price = price;
+                                                            cb(null, response);
+                                                        })
+                                                    }
+                                                })
+
 
                                             }
                                         })
@@ -2107,7 +2146,7 @@ module.exports = function (Job) {
                         }
                         else {
 
-                            if ( res && res[0].worker) {
+                            if (res && res[0].worker) {
                                 Job.app.models.favoriteSp.find({ where: { and: [{ workerId: res[0].worker.id }, { customerId: res[0].customer.id }] } }, (finalError, finalSuucess) => {
                                     if (finalError) {
                                         response.type = "Error";
@@ -2553,6 +2592,260 @@ module.exports = function (Job) {
         ],
         returns: { arg: 'response', type: 'object' }
     })
+
+
+
+    Job.calculatePromoPrice = function (data, cb) {
+        var respone = {};
+        Job.app.models.promoLog.find({ where: { customerId: data.customerId, promotionsId: data.promotionsId } }, (firstError, firstSuccess) => {
+            if (firstError) {
+                respone.type = "Error";
+                respone.message = firstError;
+                cb(null, respone);
+            }
+            else {
+                if (firstSuccess.length > 0) {
+                    respone.type = "Success";
+                    respone.IsPromoApplied = false;
+                    respone.price = data.price;
+                    respone.message = "You have already used this promo.";
+                    cb(null, respone);
+                }
+                else {
+                    if (data.IsFirstOrderOnly) {
+                        Job.find({ where: { customerId: data.customerId } }, (err, res) => {
+                            if (err) {
+                                respone.type = "Error";
+                                respone.message = err;
+                                cb(null, respone);
+                            }
+                            else {
+                                if (res.length > 0) {
+                                    respone.type = "Success";
+                                    respone.IsPromoApplied = false;
+                                    respone.price = data.price;
+                                    cb(null, respone);
+                                }
+                                else {
+                                    Job.app.models.promotionsService.find({ where: { promotionsId: data.promotionsId } }, (err1, res1) => {
+                                        if (res1.length && res1.length > 0) {
+                                            if (res1[0].serviceId == data.serviceId) {
+                                                let nowDate = new Date();
+                                                nowDate.setHours(0, 0, 0, 0, 0);
+                                                data.start_date = new Date(data.start_date);
+                                                data.start_date.setHours(0, 0, 0, 0, 0);
+                                                data.end_date = new Date(data.end_date);
+                                                data.end_date.setHours(0, 0, 0, 0, 0);
+                                                if (nowDate >= data.start_date && nowDate < data.end_date) {
+                                                    if (Number(data.NoOfUsed) < Number(data.noOfUses)) {
+                                                        if (Number(data.price) > Number(data.min_order_amount)) {
+                                                            if (Number(data.price) < Number(data.max_discount_amount)) {
+                                                                if (data.time_interval >= data.jobEstimatedHours) {
+                                                                    let finalPrice = Number(data.price) - Number(data.amount);
+                                                                    if (finalPrice > Number(data.min_charge)) {
+
+                                                                    }
+                                                                    else {
+                                                                        finalPrice = Number(data.min_charge);
+                                                                    }
+                                                                    const toUpdatePromo = { id: data.promotionsId, NoOfUsed: data.NoOfUsed + 1 };
+                                                                    Job.app.models.promotions.upsert(toUpdatePromo, (err4, res4) => {
+                                                                        const promoLogData = { customerId: data.customerId, promotionsId: data.promotionsId, price: data.price };
+                                                                        Job.app.models.promoLog.create(promoLogData, (err5, res5) => {
+                                                                            respone.type = "Success";
+                                                                            respone.IsPromoApplied = true;
+                                                                            respone.price = finalPrice;
+                                                                            respone.message = "Promo applied."
+                                                                            cb(null, respone);
+                                                                        })
+                                                                    })
+                                                                }
+                                                                else {
+                                                                    respone.type = "Success";
+                                                                    respone.IsPromoApplied = false;
+                                                                    respone.price = data.price;
+                                                                    respone.promoPrice = data.amount;
+                                                                    respone.message = "Promo code not valid for the mentioned time."
+                                                                    cb(null, respone);
+                                                                }
+
+                                                            }
+                                                            else {
+                                                                respone.type = "Success";
+                                                                respone.IsPromoApplied = false;
+                                                                respone.price = data.price;
+                                                                respone.message = "Price is more than maximum discount amount."
+                                                                cb(null, respone);
+                                                            }
+
+
+                                                        }
+                                                        else {
+                                                            respone.type = "Success";
+                                                            respone.IsPromoApplied = false;
+                                                            respone.price = data.price;
+                                                            respone.message = "Minimum Price is less."
+                                                            cb(null, respone);
+                                                        }
+                                                    }
+                                                    else {
+                                                        respone.type = "Success";
+                                                        respone.IsPromoApplied = false;
+                                                        respone.price = data.price;
+                                                        respone.message = "Maximum used count for promo reached."
+                                                        cb(null, respone);
+                                                    }
+
+                                                }
+                                                else {
+                                                    respone.type = "Success";
+                                                    respone.IsPromoApplied = false;
+                                                    respone.price = data.price;
+                                                    respone.message = "Promo code expired."
+                                                    cb(null, respone);
+                                                }
+                                            }
+                                            else {
+                                                respone.type = "Success";
+                                                respone.IsPromoApplied = false;
+                                                respone.price = data.price;
+                                                respone.message = "This promo is not applicable for the selected service."
+                                                cb(null, respone);
+                                            }
+                                        }
+                                        else {
+                                            respone.type = "Success";
+                                            respone.IsPromoApplied = false;
+                                            respone.price = data.price;
+                                            cb(null, respone);
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    }
+                    else {
+                        Job.app.models.promotionsService.find({ where: { promotionsId: data.promotionsId } }, (err1, res1) => {
+                            if (res1.length && res1.length > 0) {
+                                if (res1[0].serviceId == data.serviceId) {
+                                    let nowDate = new Date();
+                                    nowDate.setHours(0, 0, 0, 0, 0);
+                                    data.start_date = new Date(data.start_date);
+                                    data.start_date.setHours(0, 0, 0, 0, 0);
+                                    data.end_date = new Date(data.end_date);
+                                    data.end_date.setHours(0, 0, 0, 0, 0);
+                                    if (nowDate >= data.start_date && nowDate < data.end_date) {
+                                        if (Number(data.NoOfUsed) < Number(data.noOfUses)) {
+                                            if (Number(data.price) > Number(data.min_order_amount)) {
+                                                if (Number(data.price) < Number(data.max_discount_amount)) {
+                                                    if (data.time_interval >= data.jobEstimatedHours) {
+                                                        let finalPrice = Number(data.price) - Number(data.amount);
+                                                        if (finalPrice > Number(data.min_charge)) {
+
+                                                        }
+                                                        else {
+                                                            finalPrice = Number(data.min_charge);
+                                                        }
+                                                        const toUpdatePromo = { id: data.promotionsId, NoOfUsed: data.NoOfUsed + 1 };
+                                                        Job.app.models.promotions.upsert(toUpdatePromo, (err4, res4) => {
+                                                            const promoLogData = { customerId: data.customerId, promotionsId: data.promotionsId, price: data.price };
+                                                            Job.app.models.promoLog.create(promoLogData, (err5, res5) => {
+                                                                respone.type = "Success";
+                                                                respone.IsPromoApplied = true;
+                                                                respone.price = finalPrice;
+                                                                respone.promoPrice = data.amount;
+                                                                respone.message = "Promo applied."
+                                                                cb(null, respone);
+                                                            })
+                                                        })
+                                                    }
+                                                    else {
+                                                        respone.type = "Success";
+                                                        respone.IsPromoApplied = false;
+                                                        respone.price = data.price;
+                                                        respone.message = "Promo code not valid for the mentioned time."
+                                                        cb(null, respone);
+                                                    }
+
+                                                }
+                                                else {
+                                                    respone.type = "Success";
+                                                    respone.IsPromoApplied = false;
+                                                    respone.price = data.price;
+                                                    respone.message = "Price is more than maximum discount amount."
+                                                    cb(null, respone);
+                                                }
+
+
+                                            }
+                                            else {
+                                                respone.type = "Success";
+                                                respone.IsPromoApplied = false;
+                                                respone.price = data.price;
+                                                respone.message = "Minimum Price is less."
+                                                cb(null, respone);
+                                            }
+                                        }
+                                        else {
+                                            respone.type = "Success";
+                                            respone.IsPromoApplied = false;
+                                            respone.price = data.price;
+                                            respone.message = "Maximum used count for promo reached."
+                                            cb(null, respone);
+                                        }
+
+                                    }
+                                    else {
+                                        respone.type = "Success";
+                                        respone.IsPromoApplied = false;
+                                        respone.price = data.price;
+                                        respone.message = "Promo code expired."
+                                        cb(null, respone);
+                                    }
+
+
+
+                                }
+                                else {
+                                    respone.type = "Success";
+                                    respone.IsPromoApplied = false;
+                                    respone.price = data.price;
+                                    respone.message = "This promo is not applicable for the selected service."
+                                    cb(null, respone);
+                                }
+                            }
+                            else {
+                                respone.type = "Success";
+                                respone.IsPromoApplied = false;
+                                respone.price = data.price;
+                                cb(null, respone);
+                            }
+                        })
+                    }
+                }
+            }
+        })
+
+    }
+
+    Job.remoteMethod('calculatePromoPrice', {
+        http: {
+            path: '/calculatePromoPrice',
+            verb: 'POST'
+        },
+        accepts: [
+            {
+                arg: 'data',
+                type: 'object',
+                http: { source: 'body' }
+            }
+        ],
+        returns: { arg: 'response', type: 'object' }
+    })
+
+
+
+
 
 
 }                                         

@@ -1,0 +1,24 @@
+{
+  "name": "adminZone",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "admin": {
+      "type": "belongsTo",
+      "model": "Admin",
+      "foreignKey": ""
+    },
+    "zone": {
+      "type": "belongsTo",
+      "model": "Zone",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

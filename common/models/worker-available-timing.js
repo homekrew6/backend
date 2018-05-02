@@ -264,8 +264,8 @@ module.exports = function (Workeravailabletiming) {
                                 }
 
 
-                                response.type = "success";
-                                response.list = fullWokerList;
+                                response.type = "Success";
+                                response.message = { spList: fullWokerList, isfound: true };
                                 cb(null, response);
 
                             }
@@ -329,7 +329,7 @@ module.exports = function (Workeravailabletiming) {
         //     }
         // };
         var message = {
-            registration_ids: data.to,
+            to: data.to,
             data: {
                 "screenType": "JobDetails",
                 "jobId": "153"

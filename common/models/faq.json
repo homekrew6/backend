@@ -16,6 +16,9 @@
     },
     "is_active": {
       "type": "boolean"
+    },
+    "title": {
+      "type": "string"
     }
   },
   "validations": [],

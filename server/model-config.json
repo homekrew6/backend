@@ -243,5 +243,17 @@
   "payment": {
     "dataSource": "mysql",
     "public": true
+  },
+  "roleType": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "promoLog": {
+    "dataSource": "mysql",
+    "public": true
+  },
+  "adminZone": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

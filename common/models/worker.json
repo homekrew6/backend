@@ -1,121 +1,124 @@
 {
-  "name": "Worker",
-  "base": "User",
-  "idInjection": true,
-  "options": {
-    "validateUpsert": true
-  },
-  "properties": {
-    "name": {
-      "type": "string",
-      "required": true
+    "name": "Worker",
+    "base": "User",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
     },
-    "phone": {
-      "type": "string",
-      "required": true
+    "properties": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "phone": {
+            "type": "string",
+            "required": true
+        },
+        "image": {
+            "type": "string"
+        },
+        "location": {
+            "type": "geopoint"
+        },
+        "is_active": {
+            "type": "boolean"
+        },
+        "status": {
+            "type": "number",
+            "default": 0
+        },
+        "deviceToken": {
+            "type": "string",
+            "required": false
+        },
+        "deviceType": {
+            "type": "string",
+            "required": false
+        },
+        "isDedicated": {
+            "type": "boolean",
+            "default": "0"
+        },
+        "commission": {
+            "type": "string",
+            "required": false
+        }
     },
-    "image": {
-      "type": "string"
+    "validations": [],
+    "relations": {
+        "workerSkills": {
+            "type": "hasMany",
+            "model": "WorkerSkill",
+            "foreignKey": ""
+        },
+        "workerLocations": {
+            "type": "hasMany",
+            "model": "WorkerLocation",
+            "foreignKey": ""
+        },
+        "workerServices": {
+            "type": "hasMany",
+            "model": "WorkerService",
+            "foreignKey": ""
+        },
+        "workerAvailabilities": {
+            "type": "hasMany",
+            "model": "Workeravailabletiming",
+            "foreignKey": ""
+        },
+        "workerUnAvailabilities": {
+            "type": "hasMany",
+            "model": "WorkerUnavailability",
+            "foreignKey": ""
+        },
+        "jobs": {
+            "type": "hasMany",
+            "model": "Job",
+            "foreignKey": ""
+        }
     },
-    "location": {
-      "type": "geopoint"
-    },
-    "is_active": {
-      "type": "boolean"
-    },
-    "status": {
-      "type": "number",
-      "default": 0
-    },
-    "deviceToken": {
-      "type": "string",
-      "required": false
-    },
-    "isDedicated": {
-      "type": "boolean",
-      "default": "1"
-    },
-    "commission": {
-      "type": "string",
-      "required": false
-    }
-  },
-  "validations": [],
-  "relations": {
-    "workerSkills": {
-      "type": "hasMany",
-      "model": "WorkerSkill",
-      "foreignKey": ""
-    },
-    "workerLocations": {
-      "type": "hasMany",
-      "model": "WorkerLocation",
-      "foreignKey": ""
-    },
-    "workerServices": {
-      "type": "hasMany",
-      "model": "WorkerService",
-      "foreignKey": ""
-    },
-    "workerAvailabilities": {
-      "type": "hasMany",
-      "model": "Workeravailabletiming",
-      "foreignKey": ""
-    },
-    "workerUnAvailabilities": {
-      "type": "hasMany",
-      "model": "WorkerUnavailability",
-      "foreignKey": ""
-    },
-    "jobs": {
-      "type": "hasMany",
-      "model": "Job",
-      "foreignKey": ""
-    }
-  },
-  "acls": [
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "ALLOW"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$unauthenticated",
-      "permission": "ALLOW"
-    }
-  ],
-  "methods": {}
+    "acls": [{
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW"
+        },
+        {
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$authenticated",
+            "permission": "ALLOW"
+        },
+        {
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$authenticated",
+            "permission": "ALLOW"
+        },
+        {
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW"
+        },
+        {
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW"
+        },
+        {
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW"
+        },
+        {
+            "accessType": "*",
+            "principalType": "ROLE",
+            "principalId": "$unauthenticated",
+            "permission": "ALLOW"
+        }
+    ],
+    "methods": {}
 }

@@ -1,43 +1,43 @@
 {
-  "name": "Notifications",
-  "base": "PersistedModel",
-  "idInjection": true,
-  "options": {
-    "validateUpsert": true
-  },
-  "properties": {
-    "notificationType": {
-      "type": "string",
-      "required": true
+    "name": "Notifications",
+    "base": "PersistedModel",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
     },
-    "notificationDate": {
-      "type": "date",
-      "required": false
+    "properties": {
+        "notificationType": {
+            "type": "string",
+            "required": true
+        },
+        "notificationDate": {
+            "type": "string",
+            "required": false
+        },
+        "title": {
+            "type": "string",
+            "required": false
+        },
+        "sentIds": {
+            "type": "string",
+            "required": false
+        },
+        "jobId": {
+            "type": "string",
+            "required": false
+        },
+        "IsToWorker": {
+            "type": "boolean",
+            "required": false
+        },
+        "IsRead": {
+            "type": "boolean",
+            "required": false,
+            "default": 0
+        }
     },
-    "title": {
-      "type": "string",
-      "required": false
-    },
-    "sentIds": {
-      "type": "string",
-      "required": false
-    },
-    "jobId": {
-      "type": "string",
-      "required": false
-    },
-    "IsToWorker": {
-      "type": "boolean",
-      "required": false
-    },
-    "IsRead": {
-      "type": "boolean",
-      "required": false,
-      "default": 0
-    }
-  },
-  "validations": [],
-  "relations": {},
-  "acls": [],
-  "methods": {}
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
 }
