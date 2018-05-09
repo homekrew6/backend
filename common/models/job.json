@@ -45,6 +45,13 @@
     },
     "promoPrice": {
       "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "IsPaid": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],

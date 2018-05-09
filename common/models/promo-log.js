@@ -29,7 +29,7 @@ module.exports = function (Promolog) {
                             }
                             else {
                                 const price = res2[0].price;
-                                console.log("pragati", res2[0]);
+                               
                                 Promolog.destroyById(res2[0].id, (err4, res4) => {
                                     if (err4) {
                                         response.type = "Error";

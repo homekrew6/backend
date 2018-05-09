@@ -1,6 +1,7 @@
 'use strict';
 var FCM = require('fcm-push');
-var serverKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var serverKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var serverKey ="AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw";
 // var serverKey = 'AIzaSyDwIfibqZgxiERfhvvm90d_fc2gn82bQ80';
 var fcm = new FCM(serverKey);
 
@@ -271,8 +272,21 @@ module.exports = function (Workeravailabletiming) {
                             }
 
                             else {
+                                let errMessage;
+                                if(data.language=="en")
+                                {
+                                    errMessage ="No timings available for Service providers";
+                                }
+                                else if(data.language=="ar")
+                                {
+                                    errMessage ="لا توجد مواعيد متاحة لمزودي الخدمة";
+                                }
+                                else if(data.language=="fr")
+                                {
+                                    errMessage ="Aucune heure disponible pour les fournisseurs de services";
+                                }
                                 response.type = "error";
-                                response.message = "No timings available for Service providers";
+                                response.message = errMessage;
                                 cb(null, response);
                             }
 

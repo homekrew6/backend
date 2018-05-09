@@ -89,7 +89,6 @@ module.exports = function (Admin) {
     });
     Admin.on('resetPasswordRequest', function (info) {
 
-        console.log("Hello");
         var to = info.email;
         var acces_token = info.accessToken.id;
         var subject = 'OTP for reset password';
@@ -128,7 +127,6 @@ module.exports = function (Admin) {
         returns: { arg: 'response', type: 'object' }
     });
     Admin.otpChecking = function (user, cb) {
-        console.log('adminChecking', user);
 
         Admin.app.models.UserTemp.findOne({ where: { otp: user.otp } }, function (err, res) {
             if (res) {

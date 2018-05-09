@@ -1,14 +1,15 @@
 'use strict';
 var FCM = require('fcm-push');
-var workerServerKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var workerServerKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var workerServerKey = "AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw";
 var fcm = new FCM(workerServerKey);
 module.exports = function (Jobfollowup) {
 
     Jobfollowup.acceptFollowUp = function (data, cb) {
         var response = {};
-      
-       
-        Jobfollowup.remove({ where: { id: data.id} }, (err, res) => {
+
+
+        Jobfollowup.remove({ where: { id: data.id } }, (err, res) => {
             if (err) {
                 response.type = "Error";
                 response.message = err;
@@ -34,8 +35,8 @@ module.exports = function (Jobfollowup) {
                                 body: "Job Follow Up Accepted."
                             }
                         };
-                        const notificationInsertData = { IsRead: 0 ,notificationType: "JobFollowUp", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.workerId, jobId: data.jobId, IsToWorker: true };
-                       
+                        const notificationInsertData = { IsRead: 0, notificationType: "JobFollowUp", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.workerId, jobId: data.jobId, IsToWorker: true };
+
                         Jobfollowup.app.models.Notifications.create(notificationInsertData, (err2, res2) => {
                             if (err2) {
                                 response.type = "Error";
@@ -43,7 +44,7 @@ module.exports = function (Jobfollowup) {
                                 cb(null, response);
                             }
                             else {
-                             
+
                                 fcm.send(message, function (err4, fcmResponse) {
                                     if (err4) {
                                         response.type = "success";
@@ -99,27 +100,38 @@ module.exports = function (Jobfollowup) {
                         body: "Job Follow Up Declined."
                     }
                 };
-                const notificationInsertData = { notificationType: "JobFollowUpReject", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.workerId, jobId: data.jobId, IsToWorker: true, IsRead: 0  };
-                Job.app.models.Notifications.create(notificationInsertData, (err2, res2) => {
-                    if (err2) {
+                const notificationInsertData = { notificationType: "JobFollowUpReject", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.workerId, jobId: data.jobId, IsToWorker: true, IsRead: 0 };
+                const jobUpdateStatus = { id: data.jobId, status: "PAYPENDING" };
+                Jobfollowup.app.models.Job.upsert(jobUpdateStatus, (err4, res4) => {
+                    if (err4) {
                         response.type = "Error";
-                        response.message = err2;
+                        response.message = err4;
                         cb(null, response);
                     }
                     else {
-                        fcm.send(message, function (err, fcmResponse) {
-                            if (err) {
-                                response.type = "success";
-                                response.message = "Job Followed up declined successfully.";
-                                cb(null, response);
-                            } else {
-                                response.type = "success";
-                                response.message = "Job Followed up declined successfully.";
+                        Jobfollowup.app.models.Notifications.create(notificationInsertData, (err2, res2) => {
+                            if (err2) {
+                                response.type = "Error";
+                                response.message = err2;
                                 cb(null, response);
                             }
-                        });
+                            else {
+                                fcm.send(message, function (err, fcmResponse) {
+                                    if (err) {
+                                        response.type = "success";
+                                        response.message = "Job Followed up declined successfully.";
+                                        cb(null, response);
+                                    } else {
+                                        response.type = "success";
+                                        response.message = "Job Followed up declined successfully.";
+                                        cb(null, response);
+                                    }
+                                });
+                            }
+                        })
                     }
                 })
+
             }
         })
 

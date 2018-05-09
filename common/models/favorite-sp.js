@@ -1,6 +1,7 @@
 'use strict';
 var FCM = require('fcm-push');
-var workerServerKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var workerServerKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var workerServerKey = 'AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw';
 var fcm = new FCM(workerServerKey);
 module.exports = function (Favoritesp) {
 
@@ -24,14 +25,28 @@ module.exports = function (Favoritesp) {
                         }
                         else {
                             if (res.deviceToken) {
+                                let title;
+                                
+                                if(data.language=="en")
+                                {
+                                    title = "You have been added as Favourite SP."
+                                }
+                                else if(data.language=="ar")
+                                {
+                                    title ="لقد تمت إضافتك كملف SP المفضل.";
+                                }
+                                else if(data.language=="fr")
+                                {
+                                    title ="Vous avez été ajouté en tant que SP favori.";
+                                }
                                 var message = {
                                     to: res.deviceToken,
                                     data: {
                                         "screenType": "Menu"
                                     },
                                     notification: {
-                                        title: "You have been added as Favourite SP.",
-                                        body: "You have been added as Favourite SP."
+                                        title: title,
+                                        body: title
                                     }
                                 };
                                 const notificationInsertData = { notificationType: "FavSp", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.workerId, jobId: '', IsToWorker: true, IsRead: 0 };

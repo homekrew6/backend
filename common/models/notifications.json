@@ -1,43 +1,44 @@
 {
-    "name": "Notifications",
-    "base": "PersistedModel",
-    "idInjection": true,
-    "options": {
-        "validateUpsert": true
+  "name": "Notifications",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "notificationType": {
+      "type": "string",
+      "required": true
     },
-    "properties": {
-        "notificationType": {
-            "type": "string",
-            "required": true
-        },
-        "notificationDate": {
-            "type": "string",
-            "required": false
-        },
-        "title": {
-            "type": "string",
-            "required": false
-        },
-        "sentIds": {
-            "type": "string",
-            "required": false
-        },
-        "jobId": {
-            "type": "string",
-            "required": false
-        },
-        "IsToWorker": {
-            "type": "boolean",
-            "required": false
-        },
-        "IsRead": {
-            "type": "boolean",
-            "required": false,
-            "default": 0
-        }
+    "notificationDate": {
+      "type": "string",
+      "required": false
     },
-    "validations": [],
-    "relations": {},
-    "acls": [],
-    "methods": {}
+    "title": {
+      "type": "string",
+      "required": false,
+      "collation": "utf8_general_ci"
+    },
+    "sentIds": {
+      "type": "string",
+      "required": false
+    },
+    "jobId": {
+      "type": "string",
+      "required": false
+    },
+    "IsToWorker": {
+      "type": "boolean",
+      "required": false
+    },
+    "IsRead": {
+      "type": "boolean",
+      "required": false,
+      "default": 0
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
 }

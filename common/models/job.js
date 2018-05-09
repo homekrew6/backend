@@ -1,8 +1,10 @@
 'use strict';
 
 var FCM = require('fcm-push');
-var userServerKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
-var workerServerKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var userServerKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var workerServerKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var userServerKey = "AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw";
+var workerServerKey = 'AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw';
 var fcm = new FCM(workerServerKey);
 var fcm1 = new FCM(userServerKey);
 module.exports = function (Job) {
@@ -17,7 +19,8 @@ module.exports = function (Job) {
 
         var response = {};
         const postingTime = new Date();
-        let insertData = { price: data.price, postedDate: new Date(data.postedDate).toUTCString(), payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval, promoPrice: data.promoPrice };
+        const orderId = Math.floor(100000 + Math.random() * 900000);
+        let insertData = { price: data.price, postedDate: new Date(data.postedDate).toUTCString(), payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval, promoPrice: data.promoPrice, orderId: orderId, IsPaid: false };
         Job.create(insertData, (err, res) => {
             if (err) {
                 response.type = "Error";
@@ -69,11 +72,11 @@ module.exports = function (Job) {
                                                 fcm.send(message, function (err, fcmResponse) {
                                                     if (err) {
                                                         response.type = "success";
-                                                        response.message = "Job request sent successfully.";
+                                                        response.message = orderId;
                                                         cb(null, response);
                                                     } else {
                                                         response.type = "success";
-                                                        response.message = "Job request sent successfully.";
+                                                        response.message = orderId;
                                                         cb(null, response);
                                                     }
                                                 });
@@ -83,13 +86,13 @@ module.exports = function (Job) {
                                     }
                                     else {
                                         response.type = "Success";
-                                        response.message = "Job posted successfully but your favourite SP is not available right now.";
+                                        response.message = orderId;
                                     }
                                 })
                             }
                             else {
                                 data.saveDbDay = data.saveDbDay.toLowerCase();
-                                Job.app.models.WorkerSkill.find({ "serviceId": data.serviceId }, (err, res) => {
+                                Job.app.models.WorkerSkill.find({ where: { "serviceId": data.serviceId } }, (err, res) => {
                                     if (err) {
                                         response.type = "error";
                                         response.message = err;
@@ -101,6 +104,7 @@ module.exports = function (Job) {
                                             var data1 = { "workerId": res[i].workerId };
                                             workerIds.push(data1);
                                         }
+
                                         Job.app.models.WorkerLocation.find({ "where": { "or": workerIds } }, (locationError, locationSuccess) => {
                                             if (locationError) {
                                                 response.type = "error";
@@ -108,6 +112,7 @@ module.exports = function (Job) {
                                                 cb(null, response);
                                             }
                                             else {
+
                                                 var completeLocationWorkerList = [];
                                                 for (let i = 0; i < locationSuccess.length; i++) {
                                                     if (locationSuccess[i].zoneId == data.zoneId) {
@@ -116,6 +121,7 @@ module.exports = function (Job) {
                                                     }
                                                 }
                                                 var registrationIds = [];
+
                                                 var filter = '"where":{"or":' + completeLocationWorkerList + '}';
                                                 Job.app.models.Worker.find({ "where": { "or": completeLocationWorkerList } }, (error, success) => {
                                                     if (error) {
@@ -126,7 +132,7 @@ module.exports = function (Job) {
                                                     var fullWokerList = [];
                                                     fullWokerList = success;
                                                     var filter = '{"where":{"or":' + completeLocationWorkerList + '}}';
-                                                    Job.app.models.Workeravailabletiming.find({ filter }, (err1, res1) => {
+                                                    Job.app.models.Workeravailabletiming.find({ "where": { "or": completeLocationWorkerList } }, (err1, res1) => {
                                                         if (err1) {
                                                             response.type = "error";
                                                             response.message = err1;
@@ -140,7 +146,6 @@ module.exports = function (Job) {
                                                                 let pushData = { workerId: res1[i].workerId, timings: [] };
                                                                 if (res1[i].timings) {
                                                                     for (var j = 0; j < res1[i].timings.length; j++) {
-
                                                                         if (res1[i].timings[j][data.saveDbDay] == true) {
                                                                             pushData.timings.push(res1[i].timings[j]);
                                                                         }
@@ -148,6 +153,7 @@ module.exports = function (Job) {
                                                                 }
                                                                 availableDay.push(pushData);
                                                             }
+                                                            console.log("availableDay", availableDay);
                                                             for (var i = 0; i < availableDay.length; i++) {
                                                                 for (var j = 0; j < availableDay[i].timings.length; j++) {
                                                                     if (availableDay[i].timings[j].time == data.saveDBTime) {
@@ -164,21 +170,20 @@ module.exports = function (Job) {
                                                                         toSentIds.push(fullWokerList[i].id);
                                                                     }
 
-                                                                    
+
                                                                 }
-                                                               
+
                                                                 else {
                                                                     fullWokerList[i].IsAvailable = false;
                                                                 }
                                                             }
-                                                           
 
-                                                            
+
+
                                                             // response.type = "success";
                                                             // response.list = fullWokerList;
                                                             // cb(null, response);
-                                                            console.log("registrationIds", registrationIds)
-                                                            console.log("toSentIds", toSentIds)
+
                                                             var message = {
                                                                 registration_ids: registrationIds,
                                                                 data: {
@@ -205,11 +210,11 @@ module.exports = function (Job) {
                                                                     fcm.send(message, function (err, fcmResponse) {
                                                                         if (err) {
                                                                             response.type = "success";
-                                                                            response.message = "Job posted successfully.";
+                                                                            response.message = orderId;
                                                                             cb(null, response);
                                                                         } else {
                                                                             response.type = "success";
-                                                                            response.message = "Job posted successfully.";
+                                                                            response.message = orderId;
                                                                             cb(null, response);
                                                                         }
                                                                     });
@@ -220,7 +225,7 @@ module.exports = function (Job) {
 
                                                         else {
                                                             response.type = "error";
-                                                            response.message = "Job posted but No timings available for Service providers";
+                                                            response.message = orderId;
                                                             cb(null, response);
                                                         }
 
@@ -246,6 +251,7 @@ module.exports = function (Job) {
             });
 
         })
+
     }
 
 
@@ -266,6 +272,35 @@ module.exports = function (Job) {
     });
 
 
+    function getDay(day) {
+        let weekDay;
+        switch (day) {
+            case 0:
+                weekDay = "sun";
+                break;
+            case 1:
+                weekDay = "mon";
+                break;
+            case 2:
+                weekDay = "tue";
+                break;
+            case 3:
+                weekDay = "wed";
+                break;
+            case 4:
+                weekDay = "thu";
+                break;
+            case 5:
+                weekDay = "fri";
+                break;
+            case 6:
+                weekDay = "sat";
+                break;
+            default:
+                break;
+        }
+        return weekDay;
+    }
 
     Job.getJobListingForWorker = function (data, cb) {
 
@@ -280,108 +315,212 @@ module.exports = function (Job) {
             for (let i = 0; i < res.length; i++) {
                 serviceIds.push(res[i].serviceId);
             }
-
-            Job.find({ where: { serviceId: { inq: serviceIds }, status: { nin: ['FOLLOWEDUP', 'CLOSED'] } }, include: ["service", "zone", "userLocation", "customer", "currency"], "order": "postedDate ASC" }, (err1, res1) => {
-                if (err1) {
+            Job.app.models.Workeravailabletiming.find({ where: { workerId: data.workerId } }, (timingError, timingRes) => {
+                if (timingError) {
                     response.type = "Error";
-                    response.message = err1;
+                    response.message = timingError;
                     cb(null, response);
                 }
                 else {
-                    var jobs = {};
-                    jobs.upcomingJobs = [];
-                    jobs.acceptedJobs = [];
-                    jobs.declinedJobs = [];
-                    jobs.completedJobs = [];
+                    // var availableDays=[];
+                    // for (var p = 0; p < timingRes.length; p++) {
+                    //     if (timingRes[p].timings) {
+                    //         for (var q = 0; q < timingRes[p].timings.length; q++) {
 
-                    Job.find({ "where": { "workerId": data.workerId }, include: ["service", "zone", "userLocation", "customer", "currency"], "order": "postedDate ASC" }, (err2, res2) => {
-                        if (err2) {
+                    //             // if (timingRes[p].timings[q][data.saveDbDay] == true) {
+                    //             //     pushData.timings.push(res1[i].timings[j]);
+                    //             // }
+                    //             for (var key in timingRes[p].timings[q])
+                    //             {
+                    //                 // console.log("timingRes[p].timings[key]", timingRes[p].timings[key]);
+                    //                 // if (
+                    //                 //     console.log("timingRes[p].timings[key]", timingRes[p].timings[key])==true)
+                    //                 // {
+                    //                 //     availableDays.push(timingRes[p].timings[key]);
+                    //                 // }
+                    //                 console.log("timingRes[p].timings[q][key]", timingRes[p].timings[q][key]);
+
+                    //             }
+                    //         }
+                    //     }
+
+                    // }
+                    Job.find({ where: { serviceId: { inq: serviceIds }, status: { nin: ['CLOSED'] } }, include: ["service", "zone", "userLocation", "customer", "currency"], "order": "postedDate ASC" }, (err1, res1) => {
+                        if (err1) {
                             response.type = "Error";
-                            response.message = err2;
+                            response.message = err1;
                             cb(null, response);
                         }
                         else {
+                            var jobs = {};
+                            jobs.upcomingJobs = [];
+                            jobs.acceptedJobs = [];
+                            jobs.declinedJobs = [];
+                            jobs.completedJobs = [];
+                            jobs.onGoingJobs = [];
+                            jobs.cancelledJobs = [];
 
-                            Job.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job"] }, (err3, res3) => {
-                                if (err3) {
+                            Job.find({ "where": { "workerId": data.workerId }, include: ["service", "zone", "userLocation", "customer", "currency", "worker"], "order": "postedDate ASC" }, (err2, res2) => {
+                                if (err2) {
                                     response.type = "Error";
-                                    response.message = err3;
+                                    response.message = err2;
                                     cb(null, response);
                                 }
                                 else {
-                                    if (res3.length && res3.length > 0) {
-                                        for (let i = 0; i < res3.length; i++) {
-                                            if (res3[i].status != "IGNORED") {
-                                                jobs.declinedJobs.push(res3[i]);
-                                            }
 
+                                    Job.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job", "currency"] }, (err3, res3) => {
+                                        if (err3) {
+                                            response.type = "Error";
+                                            response.message = err3;
+                                            cb(null, response);
                                         }
-                                        for (let j = 0; j < res2.length; j++) {
-                                            if (res2[j].status == "ACCEPTED" || res2[j].status == "PAYPENDING" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
-                                                let index;
-                                                for (let k = 0; k < jobs.declinedJobs.length; k++) {
-                                                    if (jobs.declinedJobs[k].jobId == res2[j].id && jobs.declinedJobs[k].workerId == res2[j].workerId) {
-                                                        index = k;
+                                        else {
+                                            if (res3.length && res3.length > 0) {
+                                                for (let i = 0; i < res3.length; i++) {
+
+                                                    if (res3[i].status == "IGNORED") {
+                                                        jobs.declinedJobs.push(res3[i]);
+                                                    }
+                                                    else if (res3[i].status == "CANCELLED") {
+                                                        jobs.cancelledJobs.push(res3[i]);
+                                                    }
+
+                                                }
+                                                for (let j = 0; j < res2.length; j++) {
+                                                    if (res2[j].status == "ACCEPTED") {
+                                                        let index;
+                                                        for (let k = 0; k < jobs.declinedJobs.length; k++) {
+                                                            if (jobs.declinedJobs[k].jobId == res2[j].id && jobs.declinedJobs[k].workerId == res2[j].workerId) {
+                                                                index = k;
+                                                            }
+                                                        }
+                                                        if (index || index == 0) { }
+                                                        else {
+                                                            jobs.acceptedJobs.push(res2[j]);
+                                                        }
+                                                    }
+                                                    else if (res2[j].status == "COMPLETED") {
+                                                        jobs.completedJobs.push(res2[j]);
+                                                    }
+                                                    else if (res2[j].status == "PAYPENDING" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
+                                                        jobs.onGoingJobs.push(res2[j]);
                                                     }
                                                 }
-                                                if (index || index == 0) { }
-                                                else {
-                                                    jobs.acceptedJobs.push(res2[j]);
-                                                }
-                                            }
-                                            else if (res2[j].status == "COMPLETED") {
-                                                jobs.completedJobs.push(res2[j]);
-                                            }
-                                        }
-                                        for (let i = 0; i < res1.length; i++) {
-                                            if (res1[i].status == "STARTED") {
-                                                let index;
-                                                for (let k = 0; k < jobs.declinedJobs.length; k++) {
-                                                    // if (jobs.declinedJobs[k].jobId == res1[i].id && jobs.declinedJobs[k].workerId == res1[i].workerId) {
-                                                    //     index = k;
-                                                    // }
-                                                    if (jobs.declinedJobs[k].jobId == res1[i].id) {
-                                                        index = k;
+                                                for (let i = 0; i < res1.length; i++) {
+                                                    if (res1[i].status == "STARTED") {
+                                                        let index;
+                                                        for (let k = 0; k < jobs.declinedJobs.length; k++) {
+                                                            // if (jobs.declinedJobs[k].jobId == res1[i].id && jobs.declinedJobs[k].workerId == res1[i].workerId) {
+                                                            //     index = k;
+                                                            // }
+                                                            if (jobs.declinedJobs[k].jobId == res1[i].id) {
+                                                                index = k;
+                                                            }
+                                                        }
+                                                        if (index || index == 0) { }
+                                                        else {
+                                                            //jobs.upcomingJobs.push(res1[i]);
+                                                            let weekDay = getDay(new Date(res1[i].postedDate).getDay());
+                                                            let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                                                            time = time.replace(":00", '');
+                                                            time = time.toLowerCase();
+                                                            // console.log("weekDay", weekDay);
+                                                            // console.log("time", time);
+                                                            // console.log("timingRes.length", timingRes.length);
+
+                                                            for (var w = 0; w < timingRes.length; w++) {
+                                                                if (timingRes[w].timings) {
+                                                                    for (var v = 0; v < timingRes[w].timings.length; v++) {
+                                                                        // console.log("timingRes[p].timings[q][weekDay]", timingRes[w].timings[v][weekDay]);
+                                                                        // console.log("timingRes[p].timings[q].time", timingRes[w].timings[v].time);
+                                                                        if (timingRes[w].timings[v][weekDay] == true) {
+                                                                            // console.log("timingRes[w].timings[v].time", timingRes[w].timings[v].time);
+                                                                            // console.log("time", time);
+                                                                            if (timingRes[w].timings[v].time == time) {
+                                                                                jobs.upcomingJobs.push(res1[i]);
+
+                                                                            }
+                                                                            //finalJobData.push(timingRes[w].timings[v].time);
+
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                        //jobs.upcomingJobs.push(res1[i]);
                                                     }
                                                 }
-                                                if (index || index == 0) { }
-                                                else {
-                                                    jobs.upcomingJobs.push(res1[i]);
+                                                response.type = "Success";
+                                                response.message = jobs;
+                                                cb(null, response);
+                                            }
+                                            else {
+                                                for (let i = 0; i < res2.length; i++) {
+
+                                                    if (res2[i].status == "ACCEPTED") {
+                                                        jobs.acceptedJobs.push(res2[i]);
+                                                    }
+                                                    else if (res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
+                                                        jobs.onGoingJobs.push(res2[i]);
+                                                    }
+                                                    else if (res2[i].status == "COMPLETED") {
+                                                        jobs.completedJobs.push(res2[i]);
+                                                    }
                                                 }
-                                                //jobs.upcomingJobs.push(res1[i]);
+                                                for (let i = 0; i < res1.length; i++) {
+                                                    if (res1[i].status == "STARTED") {
+                                                        let weekDay = getDay(new Date(res1[i].postedDate).getDay());
+                                                        let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                                                        time = time.replace(":00", '');
+                                                        time = time.toLowerCase();
+                                                        // console.log("weekDay", weekDay);
+                                                        // console.log("time", time);
+                                                        // console.log("timingRes.length", timingRes.length);
+
+                                                        for (var w = 0; w < timingRes.length; w++) {
+                                                            if (timingRes[w].timings) {
+                                                                for (var v = 0; v < timingRes[w].timings.length; v++) {
+                                                                    // console.log("timingRes[p].timings[q][weekDay]", timingRes[w].timings[v][weekDay]);
+                                                                    // console.log("timingRes[p].timings[q].time", timingRes[w].timings[v].time);
+                                                                    if (timingRes[w].timings[v][weekDay] == true) {
+                                                                        // console.log("timingRes[w].timings[v].time", timingRes[w].timings[v].time);
+                                                                        // console.log("time", time);
+                                                                        if (timingRes[w].timings[v].time == time) {
+                                                                            jobs.upcomingJobs.push(res1[i]);
+
+                                                                        }
+                                                                        //finalJobData.push(timingRes[w].timings[v].time);
+
+                                                                    }
+                                                                }
+                                                            }
+
+                                                        }
+                                                        //jobs.upcomingJobs.push(res1[i]);
+
+                                                    }
+                                                }
+                                                response.type = "Success";
+                                                response.message = jobs;
+                                                cb(null, response);
                                             }
                                         }
-                                        response.type = "Success";
-                                        response.message = jobs;
-                                        cb(null, response);
-                                    }
-                                    else {
-                                        for (let i = 0; i < res2.length; i++) {
-                                            if (res2[i].status == "ACCEPTED" || res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
-                                                jobs.acceptedJobs.push(res2[i]);
-                                            }
-                                        }
-                                        for (let i = 0; i < res1.length; i++) {
-                                            if (res1[i].status == "STARTED") {
-                                                jobs.upcomingJobs.push(res1[i]);
-                                            }
-                                        }
-                                        response.type = "Success";
-                                        response.message = jobs;
-                                        cb(null, response);
-                                    }
+                                    })
+
                                 }
-                            })
 
+
+
+
+                            })
                         }
 
-
-
-
-                    })
+                    });
                 }
-
             });
+
+
 
         })
 
@@ -403,7 +542,7 @@ module.exports = function (Job) {
 
     Job.ignoreJob = function (data, cb) {
         var response = {};
-        var toInsertData = { "jobId": data.id, workerId: data.workerId, "serviceId": data.serviceId, "status": "IGNORED", "reason": "" };
+        var toInsertData = { "currencyId": data.currencyId, "jobId": data.id, workerId: data.workerId, "serviceId": data.serviceId, "status": "IGNORED", "reason": "" };
         Job.app.models.declinedJobs.create(toInsertData, (err, res) => {
             if (err) {
                 response.type = "ERROR";
@@ -648,6 +787,25 @@ module.exports = function (Job) {
                                                             }
                                                             else {
                                                                 if (res2.deviceToken) {
+                                                                    let title; let body;
+                                                                    if (res2.language) {
+                                                                        if (res2.language == "en") {
+                                                                            title = "Your job has been rescheduled.";
+                                                                            body = "Please start the job on the new date.";
+                                                                        }
+                                                                        else if (res2.language == "ar") {
+                                                                            title = "تم جدولة وظيفتك.";
+                                                                            body = "يرجى بدء المهمة في التاريخ الجديد.";
+                                                                        }
+                                                                        else if (res2.language == "fr") {
+                                                                            title = "Votre travail a été reporté.";
+                                                                            body = "Veuillez démarrer le travail à la nouvelle date.";
+                                                                        }
+                                                                    }
+                                                                    else {
+                                                                        title = "Your job has been rescheduled.";
+                                                                        body = "Please start the job on the new date.";
+                                                                    }
                                                                     var message = {
                                                                         to: res2.deviceToken,
                                                                         data: {
@@ -655,8 +813,8 @@ module.exports = function (Job) {
                                                                             "jobId": data.id
                                                                         },
                                                                         notification: {
-                                                                            title: "You job has been rescheduled.",
-                                                                            body: "You job has been rescheduled."
+                                                                            title: title,
+                                                                            body: body
                                                                         }
                                                                     };
                                                                     const notificationInsertData = { notificationType: "ResJob", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res1.workerId, jobId: res1.id, IsToWorker: true, IsRead: 0 };
@@ -773,6 +931,26 @@ module.exports = function (Job) {
                             }
                             else {
                                 if (res1.deviceToken) {
+                                    let title; let body;
+                                    if (res1.language) {
+                                        if (res1.language == "en") {
+                                            title = "Your Job is being accepted.";
+                                            body = "See the job details for service provider details.";
+                                        }
+                                        else if (res1.language == "ar") {
+                                            title = "يتم قبول وظيفتك.";
+                                            body = "انظر تفاصيل الوظيفة لمعرفة تفاصيل مقدم الخدمة.";
+                                        }
+                                        else if (res1.language == "fr") {
+                                            title = "Votre travail est accepté.";
+                                            body = "Voir les détails du travail pour les détails du fournisseur de services.";
+                                        }
+
+                                    }
+                                    else {
+                                        title = "Your Job is being accepted.";
+                                        body = "Ple see the job details for service provider details.";
+                                    }
                                     var message = {
                                         to: res1.deviceToken,
                                         data: {
@@ -780,8 +958,8 @@ module.exports = function (Job) {
                                             "jobId": data.id
                                         },
                                         notification: {
-                                            title: "Your Job is being accepted.",
-                                            body: "Your Job is being accepted"
+                                            title: title,
+                                            body: body
                                         }
                                     };
                                     const notificationInsertData = { notificationType: "JobAccepted", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
@@ -789,8 +967,8 @@ module.exports = function (Job) {
                                         if (finalError) {
                                             fcm1.send(message, function (err4, fcmResponse) {
                                                 if (err4) {
-                                                    response.type = "error";
-                                                    response.message = err4;
+                                                    response.type = "success";
+                                                    response.message = "Job accepted successfully.";
                                                     cb(null, response);
                                                 } else {
                                                     response.type = "success";
@@ -802,8 +980,8 @@ module.exports = function (Job) {
                                         else {
                                             fcm1.send(message, function (err4, fcmResponse) {
                                                 if (err4) {
-                                                    response.type = "error";
-                                                    response.message = err4;
+                                                    response.type = "success";
+                                                    response.message = "Job accepted successfully.";
                                                     cb(null, response);
                                                 } else {
                                                     response.type = "success";
@@ -847,6 +1025,7 @@ module.exports = function (Job) {
 
 
     Job.changeJobStatusByWorker = function (data, cb) {
+        console.log("data", data);
         var respone = {};
         var response = {};
         Job.app.models.jobTrackerStatus.find({ jobId: data.id }, (finalError, finalSuccess) => {
@@ -856,146 +1035,194 @@ module.exports = function (Job) {
                 cb(null, response);
             }
             else {
+                console.log("finalSuccess", finalSuccess.length);
                 if (finalSuccess.length > 0) {
-                    Job.app.models.jobTrackerStatus.update({ jobId: data.id, is_active: 0 }, (finalError1, finalSuccess1) => {
-                        if (finalError1) {
+                    console.log("success");
+                    let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                    console.log("toInsertData", toInsertData);
+                    Job.app.models.jobTrackerStatus.create(toInsertData, (finalError2, finalSuccess2) => {
+                        if (finalError2) {
                             response.type = "Error";
-                            response.message = finalError1;
+                            response.message = finalError2;
                             cb(null, response);
                         }
                         else {
-                            let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
-                            Job.app.models.jobTrackerStatus.create(toInsertData, (finalError2, finalSuccess2) => {
-                                if (finalError2) {
+                            console.log("updatingJob")
+                            Job.upsert(data, (err, res) => {
+                                if (err) {
                                     response.type = "Error";
-                                    response.message = finalError2;
+                                    response.message = err;
                                     cb(null, response);
                                 }
                                 else {
-                                    Job.upsert(data, (err, res) => {
-                                        if (err) {
+                                    Job.app.models.Customer.findById(data.customerId, (err1, res1) => {
+                                        if (err1) {
                                             response.type = "Error";
-                                            response.message = err;
+                                            response.message = err1;
                                             cb(null, response);
                                         }
                                         else {
-                                            Job.app.models.Customer.findById(data.customerId, (err1, res1) => {
-                                                if (err1) {
-                                                    response.type = "Error";
-                                                    response.message = err1;
-                                                    cb(null, response);
+                                            if (res1.deviceToken) {
+                                                let title; let body;
+                                                if (res1.language) {
+                                                    if (res1.language == "en") {
+                                                        if (data.status == 'ONMYWAY') {
+                                                            title = "The worker is on the way.";
+                                                            body = "The job will start shortly.";
+                                                        }
+                                                        else {
+                                                            title = "The worker has started the job.";
+                                                            body = "You will be notified once job is completed.";
+                                                        }
+
+                                                    }
+                                                    else if (res1.language == "ar") {
+                                                        if (data.status == "ONMYWAY") {
+                                                            title = "العامل على الطريق.";
+                                                            body = "سوف تبدأ المهمة قريبا.";
+                                                        }
+                                                        else {
+                                                            title = "بدأ العامل العمل.";
+                                                            body = "سيتم إعلامك بمجرد الانتهاء من المهمة.";
+                                                        }
+
+                                                    }
+                                                    else if (res1.language == "fr") {
+                                                        if (data.status == "ONMYWAY") {
+                                                            title = "Le travailleur est en route.";
+                                                            body = "Le travail commencera bientôt.";
+                                                        }
+                                                        else {
+                                                            title = "Le travailleur a commencé le travail.";
+                                                            body = "Vous serez averti une fois le travail terminé.";
+                                                        }
+
+                                                    }
                                                 }
                                                 else {
-                                                    if (res1.deviceToken) {
-                                                        var message = {
-                                                            to: res1.deviceToken,
-                                                            data: {
-                                                                "screenType": "JobDetails",
-                                                                "jobId": data.id
-                                                            },
-                                                            notification: {
-                                                                title: data.status == 'ONMYWAY' ? 'The worker is on the way.' : 'The worker has started the job.',
-                                                                body: data.status == 'ONMYWAY' ? 'The worker is on the way.' : 'The worker has started the job.'
-                                                            }
-                                                        };
-                                                        let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
-                                                        if (data.status != 'ONMYWAY') {
-                                                            const dataToInsert = { jobId: data.id, startTime: data.startTime, endTime: data.endTime };
-                                                            Job.app.models.jobstartTime.remove({ jobId: data.id }, (finalError8, successError8) => {
-                                                                if (finalError8) {
+                                                    if (data.status == 'ONMYWAY') {
+                                                        title = "The worker is on the way.";
+                                                        body = "The job will start shortly.";
+                                                    }
+                                                    else {
+                                                        title = "The worker has started the job.";
+                                                        body = "You will be notified once job is completed.";
+                                                    }
 
-                                                                }
-                                                                else {
-                                                                    Job.app.models.jobstartTime.upsert(dataToInsert, (err5, res5) => {
-                                                                        if (err5) {
-                                                                            response.type = "error";
-                                                                            response.message = err5;
-                                                                            cb(null, response);
-                                                                        }
-                                                                        else {
-                                                                            Job.app.models.Notifications.create(notificationInsertData, (err8, success8) => {
-                                                                                if (err8) {
-                                                                                    fcm.send(message, function (err4, fcmResponse) {
-                                                                                        if (err4) {
-                                                                                            response.type = "error";
-                                                                                            response.message = err4;
-                                                                                            cb(null, response);
-                                                                                        } else {
-                                                                                            response.type = "success";
-                                                                                            response.message = "Job status changed successfully.";
-                                                                                            cb(null, response);
-                                                                                        }
-                                                                                    });
-                                                                                }
-                                                                                else {
-                                                                                    fcm.send(message, function (err4, fcmResponse) {
-                                                                                        if (err4) {
-                                                                                            response.type = "error";
-                                                                                            response.message = err4;
-                                                                                            cb(null, response);
-                                                                                        } else {
-                                                                                            response.type = "success";
-                                                                                            response.message = "Job status changed successfully.";
-                                                                                            cb(null, response);
-                                                                                        }
-                                                                                    });
-                                                                                }
-                                                                            });
+                                                }
 
-                                                                        }
-                                                                    })
-                                                                }
-                                                            })
+                                                var message = {
+                                                    to: res1.deviceToken,
+                                                    data: {
+                                                        "screenType": "JobDetails",
+                                                        "jobId": data.id
+                                                    },
+                                                    notification: {
+                                                        title: title,
+                                                        body: body
+                                                    }
+                                                };
+
+                                                let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
+                                                if (data.status != 'ONMYWAY') {
+                                                    const dataToInsert = { jobId: data.id, startTime: data.startTime, endTime: data.endTime };
+                                                    Job.app.models.jobstartTime.remove({ jobId: data.id }, (finalError8, successError8) => {
+                                                        if (finalError8) {
 
                                                         }
                                                         else {
-                                                            Job.app.models.Notifications.create(notificationInsertData, (err9, success9) => {
-                                                                if (err9) {
-                                                                    fcm.send(message, function (err4, fcmResponse) {
-                                                                        if (err4) {
-                                                                            response.type = "error";
-                                                                            response.message = err4;
-                                                                            cb(null, response);
-                                                                        } else {
-                                                                            response.type = "success";
-                                                                            response.message = "Job status changed successfully.";
-                                                                            cb(null, response);
-                                                                        }
-                                                                    });
+                                                            Job.app.models.jobstartTime.upsert(dataToInsert, (err5, res5) => {
+                                                                if (err5) {
+                                                                    response.type = "error";
+                                                                    response.message = err5;
+                                                                    cb(null, response);
                                                                 }
                                                                 else {
-                                                                    fcm.send(message, function (err4, fcmResponse) {
-                                                                        if (err4) {
-                                                                            response.type = "error";
-                                                                            response.message = err4;
-                                                                            cb(null, response);
-                                                                        } else {
-                                                                            response.type = "success";
-                                                                            response.message = "Job status changed successfully.";
-                                                                            cb(null, response);
+                                                                    Job.app.models.Notifications.create(notificationInsertData, (err8, success8) => {
+                                                                        if (err8) {
+                                                                            fcm.send(message, function (err4, fcmResponse) {
+                                                                                if (err4) {
+                                                                                    response.type = "error";
+                                                                                    response.message = err4;
+                                                                                    cb(null, response);
+                                                                                } else {
+                                                                                    response.type = "success";
+                                                                                    response.message = "Job status changed successfully.";
+                                                                                    cb(null, response);
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                        else {
+
+                                                                            fcm.send(message, function (err4, fcmResponse) {
+                                                                                if (err4) {
+                                                                                    response.type = "error";
+                                                                                    response.message = err4;
+                                                                                    cb(null, response);
+                                                                                } else {
+                                                                                    response.type = "success";
+                                                                                    response.message = "Job status changed successfully.";
+                                                                                    cb(null, response);
+                                                                                }
+                                                                            });
                                                                         }
                                                                     });
+
                                                                 }
                                                             })
-
                                                         }
+                                                    })
 
-                                                    }
-                                                    else {
-                                                        response.type = "Success";
-                                                        response.message = "Job status changed successfully.";
-                                                        cb(null, response);
-                                                    }
                                                 }
-                                            })
+                                                else {
 
+                                                    Job.app.models.Notifications.create(notificationInsertData, (err9, success9) => {
+                                                        if (err9) {
+                                                            fcm.send(message, function (err4, fcmResponse) {
+                                                                if (err4) {
+                                                                    response.type = "error";
+                                                                    response.message = err4;
+                                                                    cb(null, response);
+                                                                } else {
+                                                                    response.type = "success";
+                                                                    response.message = "Job status changed successfully.";
+                                                                    cb(null, response);
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            fcm.send(message, function (err4, fcmResponse) {
+                                                                if (err4) {
+                                                                    response.type = "error";
+                                                                    response.message = err4;
+                                                                    cb(null, response);
+                                                                } else {
+                                                                    response.type = "success";
+                                                                    response.message = "Job status changed successfully.";
+                                                                    cb(null, response);
+                                                                }
+                                                            });
+                                                        }
+                                                    })
+
+                                                }
+
+                                            }
+                                            else {
+                                                response.type = "Success";
+                                                response.message = "Job status changed successfully.";
+                                                cb(null, response);
+                                            }
                                         }
-
                                     })
+
                                 }
+
                             })
                         }
                     })
+
+
                 }
                 else {
 
@@ -1185,7 +1412,7 @@ module.exports = function (Job) {
                         cb(null, response);
                     }
                     else {
-                        const toUpdata = { id: data.jobId, status: 'CANCELLED' };
+                        const toUpdata = { id: data.jobId, status: 'STARTED' };
                         Job.upsert(toUpdata, (updateError, updateSuccess) => {
                             if (updateError) {
                                 response.type = "Error";
@@ -1204,7 +1431,26 @@ module.exports = function (Job) {
                                         else {
 
                                             if (res2.length > 0 && res2[0].deviceToken) {
+                                                let title; let body;
+                                                if (res2[0].language) {
+                                                    if (res2[0].language == "en") {
+                                                        title = "Your Job is cancelled.";
+                                                        body = "Its opened for other service providers.";
+                                                    }
+                                                    else if (res2[0].language == "ar") {
+                                                        title = "تم إلغاء وظيفتك.";
+                                                        body = "فتحت لمقدمي الخدمات الآخرين.";
+                                                    }
+                                                    if (res2[0].language == "fr") {
+                                                        title = "Votre travail est annulé.";
+                                                        body = "Son ouvert pour d'autres fournisseurs de services.";
+                                                    }
 
+                                                }
+                                                else {
+                                                    title = "Your Job is cancelled.";
+                                                    body = "Its opened for other service providers.";
+                                                }
                                                 var message = {
                                                     to: res2[0].deviceToken,
                                                     data: {
@@ -1212,8 +1458,8 @@ module.exports = function (Job) {
                                                         "jobId": data.jobId
                                                     },
                                                     notification: {
-                                                        title: "Your Job is cancelled.",
-                                                        body: "Your Job is cancelled."
+                                                        title: title,
+                                                        body: body
                                                     }
                                                 };
                                                 const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res1.customerId, jobId: data.jobId, IsToWorker: false };
@@ -1240,7 +1486,7 @@ module.exports = function (Job) {
 
                                             }
                                             else {
-                                                response.type = "Error";
+                                                response.type = "success";
                                                 response.message = "Job Cancelled successfully but device token not found for customer.";
                                                 cb(null, response);
                                             }
@@ -1326,6 +1572,25 @@ module.exports = function (Job) {
                                                 }
                                                 else {
                                                     if (res2.deviceToken) {
+                                                        let title; let body;
+                                                        if (res2.language) {
+                                                            if (res2.language == "en") {
+                                                                title = "You job has been cancelled.";
+                                                                body = "Contact Admin for details."
+                                                            }
+                                                            else if (res2.language == "ar") {
+                                                                title = "تم إلغاء وظيفتك.";
+                                                                body = "اتصل بالمسؤول للحصول على التفاصيل."
+                                                            }
+                                                            else if (res2.language == "fr") {
+                                                                title = "Votre travail a été annulé.";
+                                                                body = "Contactez l'administrateur pour plus de détails."
+                                                            }
+                                                        }
+                                                        else {
+                                                            title = "You job has been cancelled.";
+                                                            body = "Contact Admin for details."
+                                                        }
                                                         var message = {
                                                             to: res2.deviceToken,
                                                             data: {
@@ -1333,8 +1598,8 @@ module.exports = function (Job) {
                                                                 "jobId": data.id
                                                             },
                                                             notification: {
-                                                                title: "You job has been cancelled.",
-                                                                body: "You job has been cancelled."
+                                                                title: title,
+                                                                body: body
                                                             }
                                                         };
                                                         const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res1.workerId, jobId: data.id, IsToWorker: true };
@@ -1792,6 +2057,19 @@ module.exports = function (Job) {
                     }
                     else {
                         if (res1.deviceToken) {
+                            let title; let body;
+                            if (data.language == "en") {
+                                title = "Your job is completed.";
+                                body = "Thank  you for choosing for the service."
+                            }
+                            else if (data.language == "ar") {
+                                title = "اكتملت وظيفتك.";
+                                body = "شكرا لاختيارك للخدمة."
+                            }
+                            else if (data.language == "fr") {
+                                title = "Votre travail est terminé.";
+                                body = "Merci d'avoir choisi pour le service."
+                            }
                             var message = {
                                 to: res1.deviceToken,
                                 data: {
@@ -1799,8 +2077,8 @@ module.exports = function (Job) {
                                     "jobId": data.id
                                 },
                                 notification: {
-                                    title: "Your job is completed",
-                                    body: "Your job is completed."
+                                    title: title,
+                                    body: body
                                 }
                             };
                             let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
@@ -2037,14 +2315,35 @@ module.exports = function (Job) {
                                         }
                                         else {
                                             if (customer.length > 0 && customer[0].deviceToken && worker.length > 0 && worker[0].deviceToken) {
+                                                let title;
+                                                let body;
+                                                if (customer[0].language) {
+                                                    if (customer[0].language == "en") {
+                                                        title = "Your job is being assigned.";
+                                                        body = "Assigned By Admin."
+                                                    }
+                                                    else if (customer[0].language == "ar") {
+                                                        title = "يتم تعيين وظيفتك.";
+                                                        body = "تم التعيين بواسطة المسؤول"
+                                                    }
+                                                    else if (customer[0].language == "fr") {
+                                                        title = "Votre travail est en cours d'affectation.";
+                                                        body = "Assigné par Admin."
+                                                    }
+                                                }
+                                                else {
+                                                    title = "Your job is being assigned.";
+                                                    body = "Assigned By Admin."
+
+                                                }
                                                 var message = {
                                                     to: customer[0].deviceToken,
                                                     data: {
                                                         "screenType": "AvailableJobs"
                                                     },
                                                     notification: {
-                                                        title: "Your job is being assigned.",
-                                                        body: "Your job is being assigned."
+                                                        title: title,
+                                                        body: body
                                                     }
                                                 };
                                                 fcm1.send(message, function (err, fcmResponse) {
@@ -2053,14 +2352,35 @@ module.exports = function (Job) {
                                                         response.message = err;
                                                         cb(null, response);
                                                     } else {
+                                                        title = '';
+                                                        body = '';
+                                                        if (worker[0].language) {
+                                                            if (worker[0].language == "en") {
+                                                                title = "You have been assigned a new job.";
+                                                                body = "Assigned By Admin."
+                                                            }
+                                                            else if (worker[0].language == "ar") {
+                                                                title = "لقد تم تعيين وظيفة جديدة لك.";
+                                                                body = "تم التعيين بواسطة المسؤول"
+                                                            }
+                                                            else if (worker[0].language == "fr") {
+                                                                title = "Vous avez été affecté à un nouvel emploi.";
+                                                                body = "Assigné par Admin."
+                                                            }
+                                                        }
+                                                        else {
+                                                            title = "Your job is being assigned.";
+                                                            body = "Assigned By Admin."
+
+                                                        }
                                                         var message1 = {
                                                             to: worker[0].deviceToken,
                                                             data: {
                                                                 "screenType": "AvailableJobs"
                                                             },
                                                             notification: {
-                                                                title: "You have been assigned a new job.",
-                                                                body: "You have been assigned a new job."
+                                                                title: title,
+                                                                body: body
                                                             }
                                                         };
                                                         fcm.send(message1, function (err, fcmResponse) {

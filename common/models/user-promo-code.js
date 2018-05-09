@@ -3,7 +3,7 @@
 module.exports = function(Userpromocode) {
     Userpromocode.addUserPromo = function (data, cb) {
         var response = {};
-console.log("prolmo", data);
+
         Userpromocode.app.models.promotions.find({ where: { promo_code: data.promoCode } }, (err, res) => {
             if (err) {
                 response.type = "Error";
@@ -11,24 +11,46 @@ console.log("prolmo", data);
                 cb(null, response);
             }
             else {
-                console.log("prolmolength", res);
+  
                 if(res.length && res.length>0)
                 {
-                    const toInsertData = { promotionsId: res[0].id, customerId: data.customerId, addedDate: data.addedDate };
-                    Userpromocode.create(toInsertData, (err1, res1)=>{
-                        if(err1)
+                    Userpromocode.find({ where: { promotionsId: res[0].id, customerId:data.customerId}}, (finalError, finalSuccess)=>{
+                        if(finalError)
                         {
                             response.type = "Error";
-                            response.message = err1;
+                            response.message = finalError;
                             cb(null, response); 
                         }
-                        else
+                        else 
                         {
-                            response.type = "Success";
-                            response.message = res1;
-                            cb(null, response); 
+                            if(finalSuccess.length>0)
+                            {
+                                response.type = "Error";
+                                response.message = "Promo Code already exists.";
+                                cb(null, response); 
+                            }
+                            else
+                            {
+                                // const toInsertData = { promotionsId: res[0].id, customerId: data.customerId, addedDate: data.addedDate };
+                                // Userpromocode.create(toInsertData, (err1, res1)=>{
+                                //     if(err1)
+                                //     {
+                                //         response.type = "Error";
+                                //         response.message = err1;
+                                //         cb(null, response); 
+                                //     }
+                                //     else
+                                //     {
+                                //         response.type = "Success";
+                                //         response.message = res1;
+                                //         cb(null, response); 
+                                //     }
+                                // })
+                                console.log("promo available", res);
+                            }
                         }
                     })
+                    
                 }
                 else
                 {

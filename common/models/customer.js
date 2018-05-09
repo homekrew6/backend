@@ -1,7 +1,8 @@
 'use strict';
 var loopbackPassport = require('loopback-component-passport');
 var FCM = require('fcm-push');
-var userServerKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var userServerKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var userServerKey = 'AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw';
 var fcm = new FCM(userServerKey);
 module.exports = function (Customer) {
   Customer.editCustomer = function (id, customer, cb) {
@@ -32,6 +33,7 @@ module.exports = function (Customer) {
     var to = customer.email;
     var subject = 'Successfully Registered';
     var text = 'text';
+    customer.language="en";
     var html = 'Hi,<br>Your account has been successfully registered with us<br><br>Regards,<br>Krew Team';
     Customer.upsert(customer, function (err, res) {
       var message = {
@@ -296,5 +298,60 @@ module.exports = function (Customer) {
     returns: { arg: 'response', type: 'object' }
   });
 
+
+
+  Customer.checkIfPaymentPending=function(data, cb)
+  {
+    var response={};
+    Customer.app.models.Job.find({where:{customerId:data.id, status:'PAYPENDING'}}, (err, res)=>{
+    if(err)
+    {
+      response.type="Error";
+      response.message=err;
+      cb(null, response);
+    }
+    else
+    {
+      if(res.length>0)
+      {
+        response.type="Success";
+        response.IsPayPending=true;
+        let message1;
+        if(data.language=="en")
+        {
+          message1="Please pay the pending amount to post another job.";
+        }
+        else if(data.language=="ar")
+        {
+          message1 ="يرجى دفع المبلغ المعلق لنشر وظيفة أخرى.";
+        }
+        else if (data.language == "fr") {
+          message1 = "Veuillez payer le montant en attente pour publier un autre travail.";
+        }
+
+        response.message=message1;
+        cb(null, response);
+      }
+      else 
+      {
+        response.type="Success";
+        response.IsPayPending=false;
+        cb(null, response);
+      }
+    }
+    });
+  }
+
+  Customer.remoteMethod('checkIfPaymentPending', {
+    http: { path: '/checkIfPaymentPending', verb: 'post' },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
 
 };

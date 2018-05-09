@@ -35,6 +35,19 @@
     "deviceType": {
       "type": "string",
       "required": false
+    },
+    "language": {
+      "type": "string",
+      "required": false,
+      "default": "en"
+    },
+    "languageId": {
+      "type": "string",
+      "required": false
+    },
+    "languageName": {
+      "type": "string",
+      "required": false
     }
   },
   "validations": [],

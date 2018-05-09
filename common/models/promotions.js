@@ -1,6 +1,7 @@
 'use strict';
 var FCM = require('fcm-push');
-var userServerKey = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var userServerKey_before_release = 'AIzaSyDXBq375kG8CSjsKeX11EmtQWCmyQ14ATE';
+var userServerKey = "AIzaSyDPsQQvaMIUWiL0jb_ftvKlM4OV_IFzZkw";
 var fcm1 = new FCM(userServerKey);
 module.exports = function (Promotions) {
 
@@ -196,7 +197,7 @@ module.exports = function (Promotions) {
 
 
 
-        console.log("data", data);
+
         Promotions.upsert(data, (err, res) => {
             if (err) {
                 response.type = "Error";

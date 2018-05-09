@@ -120,10 +120,6 @@
     "dataSource": "db",
     "public": true
   },
-  "abcd": {
-    "dataSource": "storage",
-    "public": true
-  },
   "demo": {
     "dataSource": "storage",
     "public": true

@@ -31,6 +31,11 @@
       "type": "belongsTo",
       "model": "service",
       "foreignKey": ""
+    },
+    "currency": {
+      "type": "belongsTo",
+      "model": "Currency",
+      "foreignKey": ""
     }
   },
   "acls": [],
