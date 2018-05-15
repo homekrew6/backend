@@ -542,21 +542,51 @@ module.exports = function (Job) {
 
     Job.ignoreJob = function (data, cb) {
         var response = {};
-        var toInsertData = { "currencyId": data.currencyId, "jobId": data.id, workerId: data.workerId, "serviceId": data.serviceId, "status": "IGNORED", "reason": "" };
-        Job.app.models.declinedJobs.create(toInsertData, (err, res) => {
-            if (err) {
-                response.type = "ERROR";
-                response.message = err;
-                cb(null, response);
-            }
-            else {
-                response.typ = "Success";
-                response.message = "You have successfully ignored the job.";
-                cb(null, response);
+        Job.app.models.declinedJobs.find({where:{jobId:data.id, workerId:data.workerId}}, (findError, findSuccess)=>{
+        if(findError)
+        {
+            response.type = "Error";
+            response.message = findError;
+            cb(null, response);
+        }
+        else if(findSuccess.length>0)
+        {
+            let message;
+            if(data.language=="en")
+            {
+                message="You have already ignored this job.";
             }
 
+           else if (data.language == "fr") {
+                message = "Vous avez déjà ignoré ce travail.";
+            }
+            else if (data.language == "ar") {
+                message = "لقد تجاهلت بالفعل هذه المهمة.";
+            }
+            response.type="Error";
+            response.message=message;
+            cb(null, response);
+        }
+        else
+        {
+            var toInsertData = { "currencyId": data.currencyId, "jobId": data.id, workerId: data.workerId, "serviceId": data.serviceId, "status": "IGNORED", "reason": "" };
+            Job.app.models.declinedJobs.create(toInsertData, (err, res) => {
+                if (err) {
+                    response.type = "Error";
+                    response.message = err;
+                    cb(null, response);
+                }
+                else {
+                    response.typ = "Success";
+                    response.message = "You have successfully ignored the job.";
+                    cb(null, response);
+                }
 
+
+            })
+        }
         })
+        
     }
 
     Job.remoteMethod('ignoreJob', {
@@ -908,104 +938,156 @@ module.exports = function (Job) {
     });
     Job.acceptJob = function (data, cb) {
         var response = {};
-        Job.upsert(data, (err, res) => {
-            if (err) {
+        Job.findById(data.id, (findError, findSuccess)=>{
+            if (findError)
+            {
                 response.type = "Error";
-                response.message = err;
+                response.message = findError;
                 cb(null, response);
             }
-            else {
-                let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
-                Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
-                    if (finalError) {
-                        response.type = "Error";
-                        response.message = finalError;
-                        cb(null, response);
-                    }
-                    else {
-                        Job.app.models.Customer.findById(data.customerId, (err1, res1) => {
-                            if (err1) {
-                                response.type = "Error";
-                                response.message = err1;
-                                cb(null, response);
-                            }
-                            else {
-                                if (res1.deviceToken) {
-                                    let title; let body;
-                                    if (res1.language) {
-                                        if (res1.language == "en") {
-                                            title = "Your Job is being accepted.";
-                                            body = "See the job details for service provider details.";
-                                        }
-                                        else if (res1.language == "ar") {
-                                            title = "يتم قبول وظيفتك.";
-                                            body = "انظر تفاصيل الوظيفة لمعرفة تفاصيل مقدم الخدمة.";
-                                        }
-                                        else if (res1.language == "fr") {
-                                            title = "Votre travail est accepté.";
-                                            body = "Voir les détails du travail pour les détails du fournisseur de services.";
-                                        }
-
-                                    }
-                                    else {
-                                        title = "Your Job is being accepted.";
-                                        body = "Ple see the job details for service provider details.";
-                                    }
-                                    var message = {
-                                        to: res1.deviceToken,
-                                        data: {
-                                            "screenType": "JobDetails",
-                                            "jobId": data.id
-                                        },
-                                        notification: {
-                                            title: title,
-                                            body: body
-                                        }
-                                    };
-                                    const notificationInsertData = { notificationType: "JobAccepted", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
-                                    Job.app.models.Notifications.create(notificationInsertData, (finalError, finalSuccess) => {
-                                        if (finalError) {
-                                            fcm1.send(message, function (err4, fcmResponse) {
-                                                if (err4) {
-                                                    response.type = "success";
-                                                    response.message = "Job accepted successfully.";
-                                                    cb(null, response);
-                                                } else {
-                                                    response.type = "success";
-                                                    response.message = "Job accepted successfully.";
-                                                    cb(null, response);
-                                                }
-                                            });
-                                        }
-                                        else {
-                                            fcm1.send(message, function (err4, fcmResponse) {
-                                                if (err4) {
-                                                    response.type = "success";
-                                                    response.message = "Job accepted successfully.";
-                                                    cb(null, response);
-                                                } else {
-                                                    response.type = "success";
-                                                    response.message = "Job accepted successfully.";
-                                                    cb(null, response);
-                                                }
-                                            });
-                                        }
-                                    })
-
-                                }
-                                else {
-                                    response.type = "Success";
-                                    response.message = "Job accepted successfully but colud'nt inform the customer.";
+            else
+            {
+                if(findSuccess.status=="ACCEPTED")
+                {
+                   if(findSuccess.workerId==data.workerId)
+                   {
+                       let message;
+                       if(data.language=="en")
+                       {
+                           message ="You have already accepted this job.";
+                       }
+                       else if(data.language=="fr")
+                       {
+                           message ="Vous avez déjà accepté ce travail.";
+                       }
+                       else if (data.language == "ar") {
+                           message = "لقد قبلت هذه الوظيفة بالفعل.";
+                       }
+                       response.type="Error";
+                       response.message =message;
+                       cb(null, response);
+                   }
+                   else
+                   {
+                       let message;
+                       if (data.language == "en") {
+                           message = "This job is already accepted.";
+                       }
+                       else if (data.language == "fr") {
+                           message = "Ce travail est déjà accepté.";
+                       }
+                       else if (data.language == "ar") {
+                           message = "هذه الوظيفة مقبولة بالفعل.";
+                       }
+                       response.type = "Error";
+                       response.message = message;
+                       cb(null, response);
+                   }
+                }
+                else
+                {
+                    Job.upsert(data, (err, res) => {
+                        if (err) {
+                            response.type = "Error";
+                            response.message = err;
+                            cb(null, response);
+                        }
+                        else {
+                            let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                            Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+                                if (finalError) {
+                                    response.type = "Error";
+                                    response.message = finalError;
                                     cb(null, response);
                                 }
-                            }
-                        })
-                    }
-                })
+                                else {
+                                    Job.app.models.Customer.findById(data.customerId, (err1, res1) => {
+                                        if (err1) {
+                                            response.type = "Error";
+                                            response.message = err1;
+                                            cb(null, response);
+                                        }
+                                        else {
+                                            if (res1.deviceToken) {
+                                                let title; let body;
+                                                if (res1.language) {
+                                                    if (res1.language == "en") {
+                                                        title = "Your Job is being accepted.";
+                                                        body = "See the job details for service provider details.";
+                                                    }
+                                                    else if (res1.language == "ar") {
+                                                        title = "يتم قبول وظيفتك.";
+                                                        body = "انظر تفاصيل الوظيفة لمعرفة تفاصيل مقدم الخدمة.";
+                                                    }
+                                                    else if (res1.language == "fr") {
+                                                        title = "Votre travail est accepté.";
+                                                        body = "Voir les détails du travail pour les détails du fournisseur de services.";
+                                                    }
 
+                                                }
+                                                else {
+                                                    title = "Your Job is being accepted.";
+                                                    body = "Ple see the job details for service provider details.";
+                                                }
+                                                var message = {
+                                                    to: res1.deviceToken,
+                                                    data: {
+                                                        "screenType": "JobDetails",
+                                                        "jobId": data.id
+                                                    },
+                                                    notification: {
+                                                        title: title,
+                                                        body: body
+                                                    }
+                                                };
+                                                const notificationInsertData = { notificationType: "JobAccepted", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
+                                                Job.app.models.Notifications.create(notificationInsertData, (finalError, finalSuccess) => {
+                                                    if (finalError) {
+                                                        fcm1.send(message, function (err4, fcmResponse) {
+                                                            if (err4) {
+                                                                response.type = "success";
+                                                                response.message = "Job accepted successfully.";
+                                                                cb(null, response);
+                                                            } else {
+                                                                response.type = "success";
+                                                                response.message = "Job accepted successfully.";
+                                                                cb(null, response);
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        fcm1.send(message, function (err4, fcmResponse) {
+                                                            if (err4) {
+                                                                response.type = "success";
+                                                                response.message = "Job accepted successfully.";
+                                                                cb(null, response);
+                                                            } else {
+                                                                response.type = "success";
+                                                                response.message = "Job accepted successfully.";
+                                                                cb(null, response);
+                                                            }
+                                                        });
+                                                    }
+                                                })
+
+                                            }
+                                            else {
+                                                response.type = "Success";
+                                                response.message = "Job accepted successfully but colud'nt inform the customer.";
+                                                cb(null, response);
+                                            }
+                                        }
+                                    })
+                                }
+                            })
+
+                        }
+
+                    })
+                }
             }
-
         })
+        
     }
 
     Job.remoteMethod('acceptJob', {

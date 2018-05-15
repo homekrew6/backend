@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(Userpromocode) {
+module.exports = function (Userpromocode) {
     Userpromocode.addUserPromo = function (data, cb) {
         var response = {};
 
@@ -10,55 +10,47 @@ module.exports = function(Userpromocode) {
                 response.message = err;
                 cb(null, response);
             }
+
             else {
-  
-                if(res.length && res.length>0)
-                {
-                    Userpromocode.find({ where: { promotionsId: res[0].id, customerId:data.customerId}}, (finalError, finalSuccess)=>{
-                        if(finalError)
-                        {
+                console.log("res", res);
+                if (res.length && res.length > 0) {
+                    Userpromocode.find({ where: { promotionsId: res[0].id, customerId: data.customerId } }, (finalError, finalSuccess) => {
+                        if (finalError) {
                             response.type = "Error";
                             response.message = finalError;
-                            cb(null, response); 
+                            cb(null, response);
                         }
-                        else 
-                        {
-                            if(finalSuccess.length>0)
-                            {
+                        else {
+                            if (finalSuccess.length > 0) {
                                 response.type = "Error";
                                 response.message = "Promo Code already exists.";
-                                cb(null, response); 
+                                cb(null, response);
                             }
-                            else
-                            {
-                                // const toInsertData = { promotionsId: res[0].id, customerId: data.customerId, addedDate: data.addedDate };
-                                // Userpromocode.create(toInsertData, (err1, res1)=>{
-                                //     if(err1)
-                                //     {
-                                //         response.type = "Error";
-                                //         response.message = err1;
-                                //         cb(null, response); 
-                                //     }
-                                //     else
-                                //     {
-                                //         response.type = "Success";
-                                //         response.message = res1;
-                                //         cb(null, response); 
-                                //     }
-                                // })
-                                console.log("promo available", res);
+                            else {
+                                const toInsertData = { promotionsId: res[0].id, customerId: data.customerId, addedDate: data.addedDate };
+                                Userpromocode.create(toInsertData, (err1, res1) => {
+                                    if (err1) {
+                                        response.type = "Error";
+                                        response.message = err1;
+                                        cb(null, response);
+                                    }
+                                    else {
+                                        response.type = "Success";
+                                        response.message = res1;
+                                        cb(null, response);
+                                    }
+                                })
                             }
                         }
                     })
-                    
+
                 }
-                else
-                {
+                else {
                     response.type = "Error";
                     response.message = "No Promo code available.";
-                    cb(null, response); 
+                    cb(null, response);
                 }
-                
+
             }
         })
     }
