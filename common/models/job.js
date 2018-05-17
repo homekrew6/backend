@@ -20,7 +20,8 @@ module.exports = function (Job) {
         var response = {};
         const postingTime = new Date();
         const orderId = Math.floor(100000 + Math.random() * 900000);
-        let insertData = { price: data.price, postedDate: new Date(data.postedDate).toUTCString(), payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval, promoPrice: data.promoPrice, orderId: orderId, IsPaid: false };
+        // let insertData = { price: data.price, postedDate: new Date(data.postedDate).toUTCString(), payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval, promoPrice: data.promoPrice, orderId: orderId, IsPaid: false };
+        let insertData = { price: data.price, postedDate: data.postedDate, payment: data.payment, faourite_sp: data.faourite_sp, promo_code: data.promo_code, status: "STARTED", customerId: data.customerId, currencyId: data.currencyId ? data.currencyId : 0, workerId: 0, zoneId: data.zoneId ? data.zoneId : 0, serviceId: data.serviceId, userLocationId: data.userLocationId, postingTime: postingTime, expectedTimeInterval: data.expectedTimeInterval, promoPrice: data.promoPrice, orderId: orderId, IsPaid: false };
         Job.create(insertData, (err, res) => {
             if (err) {
                 response.type = "Error";
@@ -304,7 +305,10 @@ module.exports = function (Job) {
 
     Job.getJobListingForWorker = function (data, cb) {
 
+        const toDaysDate = new Date();
+        const one_day = 1000 * 60 * 60 * 24;
         var response = {};
+        let zoneIds = [];
         Job.app.models.WorkerSkill.find({ "where": { "workerId": data.workerId } }, (err, res) => {
             if (err) {
                 response.type = "Error";
@@ -322,201 +326,209 @@ module.exports = function (Job) {
                     cb(null, response);
                 }
                 else {
-                    // var availableDays=[];
-                    // for (var p = 0; p < timingRes.length; p++) {
-                    //     if (timingRes[p].timings) {
-                    //         for (var q = 0; q < timingRes[p].timings.length; q++) {
-
-                    //             // if (timingRes[p].timings[q][data.saveDbDay] == true) {
-                    //             //     pushData.timings.push(res1[i].timings[j]);
-                    //             // }
-                    //             for (var key in timingRes[p].timings[q])
-                    //             {
-                    //                 // console.log("timingRes[p].timings[key]", timingRes[p].timings[key]);
-                    //                 // if (
-                    //                 //     console.log("timingRes[p].timings[key]", timingRes[p].timings[key])==true)
-                    //                 // {
-                    //                 //     availableDays.push(timingRes[p].timings[key]);
-                    //                 // }
-                    //                 console.log("timingRes[p].timings[q][key]", timingRes[p].timings[q][key]);
-
-                    //             }
-                    //         }
-                    //     }
-
-                    // }
-                    Job.find({ where: { serviceId: { inq: serviceIds }, status: { nin: ['CLOSED'] } }, include: ["service", "zone", "userLocation", "customer", "currency"], "order": "postedDate ASC" }, (err1, res1) => {
-                        if (err1) {
+                    Job.app.models.WorkerLocation.find({ "where": { "workerId": data.workerId } }, (locError, locSuccess) => {
+                        if (locError) {
                             response.type = "Error";
-                            response.message = err1;
+                            response.message = locError;
                             cb(null, response);
                         }
                         else {
-                            var jobs = {};
-                            jobs.upcomingJobs = [];
-                            jobs.acceptedJobs = [];
-                            jobs.declinedJobs = [];
-                            jobs.completedJobs = [];
-                            jobs.onGoingJobs = [];
-                            jobs.cancelledJobs = [];
 
-                            Job.find({ "where": { "workerId": data.workerId }, include: ["service", "zone", "userLocation", "customer", "currency", "worker"], "order": "postedDate ASC" }, (err2, res2) => {
-                                if (err2) {
+                            for (let i = 0; i < locSuccess.length; i++) {
+                                zoneIds.push(locSuccess[i].zoneId);
+                            }
+                            Job.find({ where: { serviceId: { inq: serviceIds }, zoneId: { inq: zoneIds }, status: { nin: ['CLOSED'] } }, include: ["service", "zone", "userLocation", "customer", "currency"], "order": "postedDate ASC" }, (err1, res1) => {
+                                if (err1) {
                                     response.type = "Error";
-                                    response.message = err2;
+                                    response.message = err1;
                                     cb(null, response);
                                 }
                                 else {
+                                    var jobs = {};
+                                    jobs.upcomingJobs = [];
+                                    jobs.acceptedJobs = [];
+                                    jobs.declinedJobs = [];
+                                    jobs.completedJobs = [];
+                                    jobs.onGoingJobs = [];
+                                    jobs.cancelledJobs = [];
 
-                                    Job.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job", "currency"] }, (err3, res3) => {
-                                        if (err3) {
+                                    Job.find({ "where": { "workerId": data.workerId }, include: ["service", "zone", "userLocation", "customer", "currency", "worker"], "order": "postedDate ASC" }, (err2, res2) => {
+                                        if (err2) {
                                             response.type = "Error";
-                                            response.message = err3;
+                                            response.message = err2;
                                             cb(null, response);
                                         }
                                         else {
-                                            if (res3.length && res3.length > 0) {
-                                                for (let i = 0; i < res3.length; i++) {
 
-                                                    if (res3[i].status == "IGNORED") {
-                                                        jobs.declinedJobs.push(res3[i]);
-                                                    }
-                                                    else if (res3[i].status == "CANCELLED") {
-                                                        jobs.cancelledJobs.push(res3[i]);
-                                                    }
-
+                                            Job.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job", "currency"] }, (err3, res3) => {
+                                                if (err3) {
+                                                    response.type = "Error";
+                                                    response.message = err3;
+                                                    cb(null, response);
                                                 }
-                                                for (let j = 0; j < res2.length; j++) {
-                                                    if (res2[j].status == "ACCEPTED") {
-                                                        let index;
-                                                        for (let k = 0; k < jobs.declinedJobs.length; k++) {
-                                                            if (jobs.declinedJobs[k].jobId == res2[j].id && jobs.declinedJobs[k].workerId == res2[j].workerId) {
-                                                                index = k;
+                                                else {
+
+                                                    if (res3.length && res3.length > 0) {
+                                                        for (let i = 0; i < res3.length; i++) {
+
+                                                            if (res3[i].status == "IGNORED") {
+                                                                jobs.declinedJobs.push(res3[i]);
+                                                            }
+                                                            else if (res3[i].status == "CANCELLED") {
+                                                                jobs.cancelledJobs.push(res3[i]);
+                                                            }
+
+                                                        }
+                                                        for (let j = 0; j < res2.length; j++) {
+                                                            if (res2[j].status == "ACCEPTED") {
+                                                                let index;
+                                                                for (let k = 0; k < jobs.declinedJobs.length; k++) {
+                                                                    if (jobs.declinedJobs[k].jobId == res2[j].id && jobs.declinedJobs[k].workerId == res2[j].workerId) {
+                                                                        index = k;
+                                                                    }
+                                                                }
+                                                                if (index || index == 0) { }
+                                                                else {
+                                                                    const postedDate = new Date(res2[j].postedDate);
+                                                                    const difference_ms = postedDate.getTime() - toDaysDate.getTime();
+                                                                    const days = Math.round(difference_ms / one_day);
+                                                                    console.log("oneDay", days);
+                                                                    if (days <= 1) {
+                                                                        jobs.acceptedJobs.push(res2[j]);
+                                                                    }
+
+                                                                }
+                                                            }
+                                                            else if (res2[j].status == "COMPLETED") {
+                                                                jobs.completedJobs.push(res2[j]);
+                                                            }
+                                                            else if (res2[j].status == "PAYPENDING" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
+                                                                jobs.onGoingJobs.push(res2[j]);
                                                             }
                                                         }
-                                                        if (index || index == 0) { }
-                                                        else {
-                                                            jobs.acceptedJobs.push(res2[j]);
-                                                        }
-                                                    }
-                                                    else if (res2[j].status == "COMPLETED") {
-                                                        jobs.completedJobs.push(res2[j]);
-                                                    }
-                                                    else if (res2[j].status == "PAYPENDING" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
-                                                        jobs.onGoingJobs.push(res2[j]);
-                                                    }
-                                                }
-                                                for (let i = 0; i < res1.length; i++) {
-                                                    if (res1[i].status == "STARTED") {
-                                                        let index;
-                                                        for (let k = 0; k < jobs.declinedJobs.length; k++) {
-                                                            // if (jobs.declinedJobs[k].jobId == res1[i].id && jobs.declinedJobs[k].workerId == res1[i].workerId) {
-                                                            //     index = k;
-                                                            // }
-                                                            if (jobs.declinedJobs[k].jobId == res1[i].id) {
-                                                                index = k;
+                                                        for (let i = 0; i < res1.length; i++) {
+                                                            if (res1[i].status == "STARTED") {
+                                                                let index;
+                                                                for (let k = 0; k < jobs.declinedJobs.length; k++) {
+                                                                    // if (jobs.declinedJobs[k].jobId == res1[i].id && jobs.declinedJobs[k].workerId == res1[i].workerId) {
+                                                                    //     index = k;
+                                                                    // }
+                                                                    if (jobs.declinedJobs[k].jobId == res1[i].id) {
+                                                                        index = k;
+                                                                    }
+                                                                }
+                                                                if (index || index == 0) { }
+                                                                else {
+                                                                    //jobs.upcomingJobs.push(res1[i]);
+                                                                    let weekDay = getDay(new Date(res1[i].postedDate).getDay());
+                                                                    let time = new Date(res1[i].postedDate).toLocaleString("en-US", { timeZone: data.timeZone }, { hour: 'numeric', minute: 'numeric', hour12: true });
+
+                                                                    //let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+                                                                    time = time.split(', ')[1];
+                                                                    time = time.replace(":00", '');
+                                                                    time = time.replace(":00", '');
+                                                                    time = time.toLowerCase();
+                                                                    // console.log("weekDay", weekDay);
+                                                                    // console.log("time", time);
+                                                                    // console.log("timingRes.length", timingRes.length);
+
+                                                                    for (var w = 0; w < timingRes.length; w++) {
+                                                                        if (timingRes[w].timings) {
+                                                                            for (var v = 0; v < timingRes[w].timings.length; v++) {
+                                                                                // console.log("timingRes[w].timings[v][weekDay", timingRes[w].timings[v][weekDay]);
+                                                                                if (timingRes[w].timings[v][weekDay] == true) {
+                                                                                    // console.log("time", time);
+                                                                                    if (timingRes[w].timings[v].time == time) {
+                                                                                        jobs.upcomingJobs.push(res1[i]);
+
+                                                                                    }
+                                                                                    //finalJobData.push(timingRes[w].timings[v].time);
+
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                                //jobs.upcomingJobs.push(res1[i]);
                                                             }
                                                         }
-                                                        if (index || index == 0) { }
-                                                        else {
-                                                            //jobs.upcomingJobs.push(res1[i]);
-                                                            let weekDay = getDay(new Date(res1[i].postedDate).getDay());
-                                                            let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                                                            time = time.replace(":00", '');
-                                                            time = time.toLowerCase();
-                                                            // console.log("weekDay", weekDay);
-                                                            // console.log("time", time);
-                                                            // console.log("timingRes.length", timingRes.length);
+                                                        response.type = "Success";
+                                                        response.message = jobs;
+                                                        cb(null, response);
+                                                    }
+                                                    else {
+                                                        for (let i = 0; i < res2.length; i++) {
 
-                                                            for (var w = 0; w < timingRes.length; w++) {
-                                                                if (timingRes[w].timings) {
-                                                                    for (var v = 0; v < timingRes[w].timings.length; v++) {
-                                                                        // console.log("timingRes[p].timings[q][weekDay]", timingRes[w].timings[v][weekDay]);
-                                                                        // console.log("timingRes[p].timings[q].time", timingRes[w].timings[v].time);
-                                                                        if (timingRes[w].timings[v][weekDay] == true) {
-                                                                            // console.log("timingRes[w].timings[v].time", timingRes[w].timings[v].time);
-                                                                            // console.log("time", time);
-                                                                            if (timingRes[w].timings[v].time == time) {
-                                                                                jobs.upcomingJobs.push(res1[i]);
+                                                            if (res2[i].status == "ACCEPTED") {
+                                                                const postedDate = new Date(res2[j].postedDate);
+                                                                const difference_ms = postedDate.getTime() - toDaysDate.getTime();
+                                                                const days = Math.round(difference_ms / one_day);
+                                                                console.log("oneDay", days);
+                                                                if (days <= 1) {
+                                                                    jobs.acceptedJobs.push(res2[i]);
+                                                                }
+
+                                                            }
+                                                            else if (res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
+                                                                jobs.onGoingJobs.push(res2[i]);
+                                                            }
+                                                            else if (res2[i].status == "COMPLETED") {
+                                                                jobs.completedJobs.push(res2[i]);
+                                                            }
+                                                        }
+                                                        for (let i = 0; i < res1.length; i++) {
+                                                            if (res1[i].status == "STARTED") {
+
+                                                                let weekDay = getDay(new Date(res1[i].postedDate).getDay());
+                                                                let time = new Date(res1[i].postedDate).toLocaleString("en-US", { timeZone: data.timeZone }, { hour: 'numeric', minute: 'numeric', hour12: true });
+                                                                time = time.split(', ')[1];
+                                                                time = time.replace(":00", '');
+                                                                time = time.replace(":00", '');
+                                                                time = time.toLowerCase();
+                                                                //let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                                                                // time = time.replace(":00", '');
+                                                                // time = time.toLowerCase();
+
+                                                                for (var w = 0; w < timingRes.length; w++) {
+                                                                    if (timingRes[w].timings) {
+                                                                        for (var v = 0; v < timingRes[w].timings.length; v++) {
+                                                                            if (timingRes[w].timings[v][weekDay] == true) {
+                                                                                if (timingRes[w].timings[v].time == time) {
+                                                                                    jobs.upcomingJobs.push(res1[i]);
+
+                                                                                }
+                                                                                //finalJobData.push(timingRes[w].timings[v].time);
 
                                                                             }
-                                                                            //finalJobData.push(timingRes[w].timings[v].time);
-
                                                                         }
                                                                     }
+
                                                                 }
+                                                                //jobs.upcomingJobs.push(res1[i]);
 
                                                             }
                                                         }
-                                                        //jobs.upcomingJobs.push(res1[i]);
+                                                        response.type = "Success";
+                                                        response.message = jobs;
+                                                        cb(null, response);
                                                     }
                                                 }
-                                                response.type = "Success";
-                                                response.message = jobs;
-                                                cb(null, response);
-                                            }
-                                            else {
-                                                for (let i = 0; i < res2.length; i++) {
+                                            })
 
-                                                    if (res2[i].status == "ACCEPTED") {
-                                                        jobs.acceptedJobs.push(res2[i]);
-                                                    }
-                                                    else if (res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
-                                                        jobs.onGoingJobs.push(res2[i]);
-                                                    }
-                                                    else if (res2[i].status == "COMPLETED") {
-                                                        jobs.completedJobs.push(res2[i]);
-                                                    }
-                                                }
-                                                for (let i = 0; i < res1.length; i++) {
-                                                    if (res1[i].status == "STARTED") {
-                                                        let weekDay = getDay(new Date(res1[i].postedDate).getDay());
-                                                        let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-                                                        time = time.replace(":00", '');
-                                                        time = time.toLowerCase();
-                                                        // console.log("weekDay", weekDay);
-                                                        // console.log("time", time);
-                                                        // console.log("timingRes.length", timingRes.length);
-
-                                                        for (var w = 0; w < timingRes.length; w++) {
-                                                            if (timingRes[w].timings) {
-                                                                for (var v = 0; v < timingRes[w].timings.length; v++) {
-                                                                    // console.log("timingRes[p].timings[q][weekDay]", timingRes[w].timings[v][weekDay]);
-                                                                    // console.log("timingRes[p].timings[q].time", timingRes[w].timings[v].time);
-                                                                    if (timingRes[w].timings[v][weekDay] == true) {
-                                                                        // console.log("timingRes[w].timings[v].time", timingRes[w].timings[v].time);
-                                                                        // console.log("time", time);
-                                                                        if (timingRes[w].timings[v].time == time) {
-                                                                            jobs.upcomingJobs.push(res1[i]);
-
-                                                                        }
-                                                                        //finalJobData.push(timingRes[w].timings[v].time);
-
-                                                                    }
-                                                                }
-                                                            }
-
-                                                        }
-                                                        //jobs.upcomingJobs.push(res1[i]);
-
-                                                    }
-                                                }
-                                                response.type = "Success";
-                                                response.message = jobs;
-                                                cb(null, response);
-                                            }
                                         }
-                                    })
 
+
+
+
+                                    })
                                 }
 
-
-
-
-                            })
+                            });
                         }
+                    })
 
-                    });
                 }
             });
 
@@ -542,51 +554,47 @@ module.exports = function (Job) {
 
     Job.ignoreJob = function (data, cb) {
         var response = {};
-        Job.app.models.declinedJobs.find({where:{jobId:data.id, workerId:data.workerId}}, (findError, findSuccess)=>{
-        if(findError)
-        {
-            response.type = "Error";
-            response.message = findError;
-            cb(null, response);
-        }
-        else if(findSuccess.length>0)
-        {
-            let message;
-            if(data.language=="en")
-            {
-                message="You have already ignored this job.";
+        Job.app.models.declinedJobs.find({ where: { jobId: data.id, workerId: data.workerId } }, (findError, findSuccess) => {
+            if (findError) {
+                response.type = "Error";
+                response.message = findError;
+                cb(null, response);
             }
-
-           else if (data.language == "fr") {
-                message = "Vous avez déjà ignoré ce travail.";
-            }
-            else if (data.language == "ar") {
-                message = "لقد تجاهلت بالفعل هذه المهمة.";
-            }
-            response.type="Error";
-            response.message=message;
-            cb(null, response);
-        }
-        else
-        {
-            var toInsertData = { "currencyId": data.currencyId, "jobId": data.id, workerId: data.workerId, "serviceId": data.serviceId, "status": "IGNORED", "reason": "" };
-            Job.app.models.declinedJobs.create(toInsertData, (err, res) => {
-                if (err) {
-                    response.type = "Error";
-                    response.message = err;
-                    cb(null, response);
-                }
-                else {
-                    response.typ = "Success";
-                    response.message = "You have successfully ignored the job.";
-                    cb(null, response);
+            else if (findSuccess.length > 0) {
+                let message;
+                if (data.language == "en") {
+                    message = "You have already ignored this job.";
                 }
 
+                else if (data.language == "fr") {
+                    message = "Vous avez déjà ignoré ce travail.";
+                }
+                else if (data.language == "ar") {
+                    message = "لقد تجاهلت بالفعل هذه المهمة.";
+                }
+                response.type = "Error";
+                response.message = message;
+                cb(null, response);
+            }
+            else {
+                var toInsertData = { "currencyId": data.currencyId, "jobId": data.id, workerId: data.workerId, "serviceId": data.serviceId, "status": "IGNORED", "reason": "" };
+                Job.app.models.declinedJobs.create(toInsertData, (err, res) => {
+                    if (err) {
+                        response.type = "Error";
+                        response.message = err;
+                        cb(null, response);
+                    }
+                    else {
+                        response.typ = "Success";
+                        response.message = "You have successfully ignored the job.";
+                        cb(null, response);
+                    }
 
-            })
-        }
+
+                })
+            }
         })
-        
+
     }
 
     Job.remoteMethod('ignoreJob', {
@@ -938,54 +946,47 @@ module.exports = function (Job) {
     });
     Job.acceptJob = function (data, cb) {
         var response = {};
-        Job.findById(data.id, (findError, findSuccess)=>{
-            if (findError)
-            {
+        Job.findById(data.id, (findError, findSuccess) => {
+            if (findError) {
                 response.type = "Error";
                 response.message = findError;
                 cb(null, response);
             }
-            else
-            {
-                if(findSuccess.status=="ACCEPTED")
-                {
-                   if(findSuccess.workerId==data.workerId)
-                   {
-                       let message;
-                       if(data.language=="en")
-                       {
-                           message ="You have already accepted this job.";
-                       }
-                       else if(data.language=="fr")
-                       {
-                           message ="Vous avez déjà accepté ce travail.";
-                       }
-                       else if (data.language == "ar") {
-                           message = "لقد قبلت هذه الوظيفة بالفعل.";
-                       }
-                       response.type="Error";
-                       response.message =message;
-                       cb(null, response);
-                   }
-                   else
-                   {
-                       let message;
-                       if (data.language == "en") {
-                           message = "This job is already accepted.";
-                       }
-                       else if (data.language == "fr") {
-                           message = "Ce travail est déjà accepté.";
-                       }
-                       else if (data.language == "ar") {
-                           message = "هذه الوظيفة مقبولة بالفعل.";
-                       }
-                       response.type = "Error";
-                       response.message = message;
-                       cb(null, response);
-                   }
+            else {
+                // console.log("findSuccess", findSuccess);
+                if (findSuccess.status == "ACCEPTED") {
+                    if (findSuccess.workerId == data.workerId) {
+                        let message;
+                        if (data.language == "en") {
+                            message = "You have already accepted this job.";
+                        }
+                        else if (data.language == "fr") {
+                            message = "Vous avez déjà accepté ce travail.";
+                        }
+                        else if (data.language == "ar") {
+                            message = "لقد قبلت هذه الوظيفة بالفعل.";
+                        }
+                        response.type = "Error";
+                        response.message = message;
+                        cb(null, response);
+                    }
+                    else {
+                        let message;
+                        if (data.language == "en") {
+                            message = "This job is already accepted.";
+                        }
+                        else if (data.language == "fr") {
+                            message = "Ce travail est déjà accepté.";
+                        }
+                        else if (data.language == "ar") {
+                            message = "هذه الوظيفة مقبولة بالفعل.";
+                        }
+                        response.type = "Error";
+                        response.message = message;
+                        cb(null, response);
+                    }
                 }
-                else
-                {
+                else {
                     Job.upsert(data, (err, res) => {
                         if (err) {
                             response.type = "Error";
@@ -1087,7 +1088,7 @@ module.exports = function (Job) {
                 }
             }
         })
-        
+
     }
 
     Job.remoteMethod('acceptJob', {
@@ -2122,125 +2123,243 @@ module.exports = function (Job) {
 
 
     Job.completeJob = function (data, cb) {
+
         var response = {};
-        Job.upsert(data, (err, res) => {
-            if (err) {
+
+        Job.app.models.Worker.findById(data.workerId, (err1, res1) => {
+            if (err1) {
                 response.type = "Error";
-                response.message = err;
+                response.message = err1;
                 cb(null, response);
             }
             else {
-
-                Job.app.models.Worker.findById(data.workerId, (err1, res1) => {
-                    if (err1) {
-                        response.type = "Error";
-                        response.message = err1;
-                        cb(null, response);
+                if (res1.deviceToken) {
+                    let title; let body;
+                    if (data.language == "en") {
+                        title = "Your job is completed.";
+                        body = "Thank  you for choosing for the service."
                     }
-                    else {
-                        if (res1.deviceToken) {
-                            let title; let body;
-                            if (data.language == "en") {
-                                title = "Your job is completed.";
-                                body = "Thank  you for choosing for the service."
-                            }
-                            else if (data.language == "ar") {
-                                title = "اكتملت وظيفتك.";
-                                body = "شكرا لاختيارك للخدمة."
-                            }
-                            else if (data.language == "fr") {
-                                title = "Votre travail est terminé.";
-                                body = "Merci d'avoir choisi pour le service."
-                            }
-                            var message = {
-                                to: res1.deviceToken,
-                                data: {
-                                    "screenType": "JobDetails",
-                                    "jobId": data.id
-                                },
-                                notification: {
-                                    title: title,
-                                    body: body
-                                }
-                            };
-                            let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
-                            Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
-                                fcm.send(message, function (err, fcmResponse) {
-                                    if (err) {
-                                        response.type = "error";
-                                        response.message = err;
+                    else if (data.language == "ar") {
+                        title = "اكتملت وظيفتك.";
+                        body = "شكرا لاختيارك للخدمة."
+                    }
+                    else if (data.language == "fr") {
+                        title = "Votre travail est terminé.";
+                        body = "Merci d'avoir choisi pour le service."
+                    }
+                    var message = {
+                        to: res1.deviceToken,
+                        data: {
+                            "screenType": "JobDetails",
+                            "jobId": data.id
+                        },
+                        notification: {
+                            title: title,
+                            body: body
+                        }
+                    };
+                    let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
+                    Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
+                        fcm.send(message, function (err, fcmResponse) {
+                            if (err) {
+                                response.type = "error";
+                                response.message = err;
+                                cb(null, response);
+                            } else {
+                                Job.app.models.Service.findById(data.serviceId, (err2, res2) => {
+                                    if (err2) {
+                                        response.type = "Error";
+                                        response.message = err2;
                                         cb(null, response);
-                                    } else {
-                                        Job.app.models.Service.findById(data.serviceId, (err2, res2) => {
-                                            if (err2) {
-                                                response.type = "Error";
-                                                response.message = err2;
-                                                cb(null, response);
+                                    }
+                                    else {
+                                        var definedTime = res2.time_interval;
+                                        var actualTime = Number(data.actualTime);
+                                        var price;
+                                        if (actualTime == res2.time_interval) {
+                                            price = data.price;
+                                        }
+                                        else if (actualTime > res2.time_interval) {
+                                            var noOfBrackets = actualTime / 15;
+                                            var finalNoOfBrackets = Math.ceil(noOfBrackets);
+                                            var chargePerHourForBracket = res2.cost_per_hour / 4;
+                                            var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+                                            if (finalCost < res2.min_charge) {
+                                                finalCost = res2.min_charge;
                                             }
-                                            else {
-                                                var definedTime = res2.time_interval;
-                                                var actualTime = Number(data.actualTime);
-                                                var price;
-                                                if (actualTime == res2.time_interval) {
-                                                    price = data.price;
-                                                }
-                                                else if (actualTime > res2.time_interval) {
-                                                    var noOfBrackets = actualTime / 15;
-                                                    var finalNoOfBrackets = Math.ceil(noOfBrackets);
-                                                    var chargePerHourForBracket = res2.cost_per_hour / 4;
-                                                    var finalCost = chargePerHourForBracket * finalNoOfBrackets;
-                                                    if (finalCost < res2.min_charge) {
-                                                        finalCost = res2.min_charge;
-                                                    }
-                                                    price = finalCost;
+                                            price = finalCost;
+                                        }
+                                        else {
+                                            var noOfBrackets = actualTime / 15;
+                                            var finalNoOfBrackets = Math.ceil(noOfBrackets);
+                                            var chargePerHourForBracket = res2.cost_per_hour / 4;
+                                            var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+                                            if (finalCost < res2.min_charge) {
+                                                finalCost = res2.min_charge;
+                                            }
+                                            price = finalCost;
+                                        }
+                                        const data = { status: data.status, id: data.id, price: price };
+                                        Job.upsert(data, (jobError, jobSuccess) => {
+                                            Job.app.models.jobTrackerStatus.update({ jobId: data.id, is_active: 0 }, (statusError, statusSuccess) => {
+                                                if (statusError) {
+                                                    response.type = "Error";
+                                                    response.message = "Error in updating job status.";
+                                                    response.price = price;
+                                                    cb(null, response);
                                                 }
                                                 else {
-                                                    var noOfBrackets = actualTime / 15;
-                                                    var finalNoOfBrackets = Math.ceil(noOfBrackets);
-                                                    var chargePerHourForBracket = res2.cost_per_hour / 4;
-                                                    var finalCost = chargePerHourForBracket * finalNoOfBrackets;
-                                                    if (finalCost < res2.min_charge) {
-                                                        finalCost = res2.min_charge;
-                                                    }
-                                                    price = finalCost;
-                                                }
-
-                                                Job.app.models.jobTrackerStatus.update({ jobId: data.id, is_active: 0 }, (statusError, statusSuccess) => {
-                                                    if (statusError) {
-                                                        response.type = "Error";
-                                                        response.message = "Error in updating job status.";
+                                                    let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                                                    Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+                                                        response.type = "Success";
+                                                        response.message = "Job Completed.";
                                                         response.price = price;
                                                         cb(null, response);
-                                                    }
-                                                    else {
-                                                        let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
-                                                        Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
-                                                            response.type = "Success";
-                                                            response.message = "Job Completed.";
-                                                            response.price = price;
-                                                            cb(null, response);
-                                                        })
-                                                    }
-                                                })
-
-
-                                            }
+                                                    })
+                                                }
+                                            })
                                         })
 
-                                    }
-                                });
-                            })
 
-                        }
-                        else {
-                            response.type = "Success";
-                            response.message = "Job Completd but couldn't inform customer";
-                            cb(null, response);
-                        }
-                    }
-                })
+
+                                    }
+                                })
+
+                            }
+                        });
+                    })
+
+                }
+                else {
+                    response.type = "Success";
+                    response.message = "Job Completd but couldn't inform customer";
+                    cb(null, response);
+                }
             }
         })
+
+
+
+
+        // var response = {};
+        // Job.upsert(data, (err, res) => {
+        //     if (err) {
+        //         response.type = "Error";
+        //         response.message = err;
+        //         cb(null, response);
+        //     }
+        //     else {
+
+        //         Job.app.models.Worker.findById(data.workerId, (err1, res1) => {
+        //             if (err1) {
+        //                 response.type = "Error";
+        //                 response.message = err1;
+        //                 cb(null, response);
+        //             }
+        //             else {
+        //                 if (res1.deviceToken) {
+        //                     let title; let body;
+        //                     if (data.language == "en") {
+        //                         title = "Your job is completed.";
+        //                         body = "Thank  you for choosing for the service."
+        //                     }
+        //                     else if (data.language == "ar") {
+        //                         title = "اكتملت وظيفتك.";
+        //                         body = "شكرا لاختيارك للخدمة."
+        //                     }
+        //                     else if (data.language == "fr") {
+        //                         title = "Votre travail est terminé.";
+        //                         body = "Merci d'avoir choisi pour le service."
+        //                     }
+        //                     var message = {
+        //                         to: res1.deviceToken,
+        //                         data: {
+        //                             "screenType": "JobDetails",
+        //                             "jobId": data.id
+        //                         },
+        //                         notification: {
+        //                             title: title,
+        //                             body: body
+        //                         }
+        //                     };
+        //                     let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
+        //                     Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
+        //                         fcm.send(message, function (err, fcmResponse) {
+        //                             if (err) {
+        //                                 response.type = "error";
+        //                                 response.message = err;
+        //                                 cb(null, response);
+        //                             } else {
+        //                                 Job.app.models.Service.findById(data.serviceId, (err2, res2) => {
+        //                                     if (err2) {
+        //                                         response.type = "Error";
+        //                                         response.message = err2;
+        //                                         cb(null, response);
+        //                                     }
+        //                                     else {
+        //                                         var definedTime = res2.time_interval;
+        //                                         var actualTime = Number(data.actualTime);
+        //                                         var price;
+        //                                         if (actualTime == res2.time_interval) {
+        //                                             price = data.price;
+        //                                         }
+        //                                         else if (actualTime > res2.time_interval) {
+        //                                             var noOfBrackets = actualTime / 15;
+        //                                             var finalNoOfBrackets = Math.ceil(noOfBrackets);
+        //                                             var chargePerHourForBracket = res2.cost_per_hour / 4;
+        //                                             var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+        //                                             if (finalCost < res2.min_charge) {
+        //                                                 finalCost = res2.min_charge;
+        //                                             }
+        //                                             price = finalCost;
+        //                                         }
+        //                                         else {
+        //                                             var noOfBrackets = actualTime / 15;
+        //                                             var finalNoOfBrackets = Math.ceil(noOfBrackets);
+        //                                             var chargePerHourForBracket = res2.cost_per_hour / 4;
+        //                                             var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+        //                                             if (finalCost < res2.min_charge) {
+        //                                                 finalCost = res2.min_charge;
+        //                                             }
+        //                                             price = finalCost;
+        //                                         }
+
+        //                                         Job.app.models.jobTrackerStatus.update({ jobId: data.id, is_active: 0 }, (statusError, statusSuccess) => {
+        //                                             if (statusError) {
+        //                                                 response.type = "Error";
+        //                                                 response.message = "Error in updating job status.";
+        //                                                 response.price = price;
+        //                                                 cb(null, response);
+        //                                             }
+        //                                             else {
+        //                                                 let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+        //                                                 Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+        //                                                     response.type = "Success";
+        //                                                     response.message = "Job Completed.";
+        //                                                     response.price = price;
+        //                                                     cb(null, response);
+        //                                                 })
+        //                                             }
+        //                                         })
+
+
+        //                                     }
+        //                                 })
+
+        //                             }
+        //                         });
+        //                     })
+
+        //                 }
+        //                 else {
+        //                     response.type = "Success";
+        //                     response.message = "Job Completd but couldn't inform customer";
+        //                     cb(null, response);
+        //                 }
+        //             }
+        //         })
+        //     }
+        // })
 
 
     }

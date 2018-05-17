@@ -207,4 +207,56 @@ module.exports = function (Worker) {
   });
 
 
+
+  Worker.getWorkerDetailsById=function(data, cb)
+  {
+    var resposne={};
+    let details;
+    Worker.findById(data.id,(err, res)=>{
+      if(err)
+      {
+        resposne.type="Error";
+        resposne.message=err;
+        cb(null, resposne);
+      }
+      else
+      {
+        details=res;
+        Worker.app.models.Rating.find({ where: { IsWorkerSender: false, workerId:data.id}}, (err1, res1)=>{
+          if(err1)
+          {
+            resposne.type="Error";
+            resposne.message=err1;
+            cb(null, resposne);
+          }
+          else
+          {
+          let starRating=0;
+          for(let i=0;i<res1.length;i++)
+          {
+            starRating = starRating + Number(res1[i].rating);
+            starRating = starRating / (res1.length);
+          }
+            details.starRating=starRating;
+            resposne.type="Success";
+            resposne.message=details;
+            cb(null, resposne);
+          }
+        })
+      }
+    })
+  }
+
+  Worker.remoteMethod('getWorkerDetailsById', {
+    http: { path: '/getWorkerDetailsById', verb: 'post' },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
+
 };
