@@ -360,7 +360,7 @@ module.exports = function (Job) {
                                             cb(null, response);
                                         }
                                         else {
-
+                                         console.log("pragati");
                                             Job.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job", "currency"] }, (err3, res3) => {
                                                 if (err3) {
                                                     response.type = "Error";
@@ -390,12 +390,13 @@ module.exports = function (Job) {
                                                                 }
                                                                 if (index || index == 0) { }
                                                                 else {
-                                                                    const postedDate = new Date(res2[j].postedDate);
-                                                                    const difference_ms = postedDate.getTime() - toDaysDate.getTime();
-                                                                    const days = Math.round(difference_ms / one_day);
-                                                                    if (days <= 1) {
-                                                                        jobs.acceptedJobs.push(res2[j]);
-                                                                    }
+                                                                    // const postedDate = new Date(res2[j].postedDate);
+                                                                    // const difference_ms = postedDate.getTime() - toDaysDate.getTime();
+                                                                    // const days = Math.round(difference_ms / one_day);
+                                                                    // if (days <= 1) {
+                                                                    //     jobs.acceptedJobs.push(res2[j]);
+                                                                    // }
+                                                                    jobs.acceptedJobs.push(res2[j]);
 
                                                                 }
                                                             }
@@ -468,13 +469,14 @@ module.exports = function (Job) {
                                                         for (let i = 0; i < res2.length; i++) {
 
                                                             if (res2[i].status == "ACCEPTED") {
-                                                                const postedDate = new Date(res2[i].postedDate);
-                                                                const difference_ms = postedDate.getTime() - toDaysDate.getTime();
-                                                                const days = Math.round(difference_ms / one_day);
-                                                                console.log("oneDay", days);
-                                                                if (days <= 1) {
-                                                                    jobs.acceptedJobs.push(res2[i]);
-                                                                }
+                                                                // const postedDate = new Date(res2[i].postedDate);
+                                                                // const difference_ms = postedDate.getTime() - toDaysDate.getTime();
+                                                                // const days = Math.round(difference_ms / one_day);
+                                                                // console.log("oneDay", days);
+                                                                // if (days <= 1) {
+                                                                //     jobs.acceptedJobs.push(res2[i]);
+                                                                // }
+                                                                jobs.acceptedJobs.push(res2[i]);
 
                                                             }
                                                             else if (res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
@@ -638,11 +640,12 @@ module.exports = function (Job) {
                 cb(null, respone);
             }
             else {
-                const newDateUtc = newDate.toUTCString();
-                const newDateTime = new Date(newDateUtc).getTime();
-                const postedDateTime = new Date(data.postedDate).getTime();
-                let secondsDiff = (newDateTime - postedDateTime) / 1000;
-                let hoursDiff = secondsDiff / 3600;
+                // const newDateUtc = newDate.toUTCString();
+                // const newDateTime = new Date(newDateUtc).getTime();
+                // const postedDateTime = new Date(data.postedDate).getTime();
+                // let secondsDiff = (newDateTime - postedDateTime) / 1000;
+                // let hoursDiff = secondsDiff / 3600;
+                let hoursDiff = minutes / 60;
                 let priceToCharge;
                 data.price = Number(data.price);
                 if (hoursDiff < 0) {
@@ -1024,8 +1027,7 @@ module.exports = function (Job) {
                                             response.message = "You have already accepted a job in that interval.";
                                             cb(null, response);
                                         }
-                                        else if (toCompareDate1.getTime() <= toAcceptDateWithAddedTime && toCompareDate1.getTime() >= toAcceptJobPostingDate1.getTime())
-                                        {
+                                        else if (toCompareDate1.getTime() <= toAcceptDateWithAddedTime && toCompareDate1.getTime() >= toAcceptJobPostingDate1.getTime()) {
                                             response.type = "Error";
                                             response.message = "You have already accepted a job in that interval.";
                                             cb(null, response);
@@ -1131,15 +1133,13 @@ module.exports = function (Job) {
                                         }
                                     }
                                     else {
-                                        Job.upsert(data, (jobUpdateError2, JobUpdateSuccess2)=>{
-                                            if(jobUpdateError2)
-                                            {
-                                                response.type="Error";
-                                                response.message=jobUpdateError2;
+                                        Job.upsert(data, (jobUpdateError2, JobUpdateSuccess2) => {
+                                            if (jobUpdateError2) {
+                                                response.type = "Error";
+                                                response.message = jobUpdateError2;
                                                 cb(null, response);
                                             }
-                                            else
-                                            {
+                                            else {
                                                 let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
                                                 Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
                                                     if (finalError) {
@@ -1229,7 +1229,7 @@ module.exports = function (Job) {
                                                 })
                                             }
                                         })
-                                        
+
                                     }
                                 }
                             }
@@ -1859,210 +1859,391 @@ module.exports = function (Job) {
         ],
         returns: { arg: 'response', type: 'object' }
     });
-    Job.cancelJobByUser = function (data, cb) {
+
+    Job.cancelllationPriceCalculate = function (data, cb) {
         var response = {};
         try {
             const postingTime = new Date(data.postingTime);
             const newDate = new Date();
             const seconds = (newDate.getTime() - postingTime.getTime()) / 1000;
             const minutes = seconds / 60;
-            Job.findById(data.id, (err1, res1) => {
-                if (minutes <= 5) {
+            console.log("postingTime", postingTime);
+            console.log("newDate", newDate);
+            console.log("minutes", minutes);
+            if (minutes <= 5) {
+                response.type = "Success";
+                response.IsCancellationPrice = false;
+                response.price = "0.0";
+                cb(null, response);
+            }
+            else {
+                Job.findById(data.id, (error1, res1) => {
+                    if (error1) {
+                        response.type = "Error";
+                        response.message = error1;
+                        cb(null, response);
+                    }
+                    else {
+                        if (res1) {
+                            // const newDateUtc = newDate.toUTCString();
+                            // const newDateTime = new Date(newDateUtc).getTime();
+                            // const postedDateTime = new Date(res1.postingTime).getTime();
+                            // let secondsDiff = (newDateTime - postedDateTime) / 1000;
+                            // let hoursDiff = secondsDiff / 3600;
+                            let hoursDiff=minutes/60;
+                            console.log("hoursDiff", hoursDiff);
+                            let priceToCharge;
+                            data.price = Number(data.price);
+                            if (hoursDiff < 0) {
+                                priceToCharge = "0.0";
+                            }
+                            else if (hoursDiff > 24) {
+                                priceToCharge = "0.0";
+                            }
+                            else if (hoursDiff > 4 && hoursDiff < 24) {
+                                priceToCharge = (50 * (data.price) / 100);
+                                priceToCharge = priceToCharge.toFixed(2);
+                            }
+                            else if (hoursDiff < 4) {
+                                priceToCharge = (50 * (data.price) / 100);
+                                priceToCharge = priceToCharge.toFixed(2);
+                            }
+                            response.type = "Success";
+                            response.IsCancellationPrice = false;
+                            response.price = parseFloat(priceToCharge).toFixed(2);
+                            cb(null, response);
+                        }
+                        else {
+                            response.type = "Error";
+                            response.message = "No job found.";
+                            cb(null, response);
+                        }
 
+                    }
+                })
 
+            }
+
+        } catch (error) {
+            response.type = "Error";
+            response.message = error;
+            cb(null, response);
+        }
+    }
+
+    Job.remoteMethod('cancelllationPriceCalculate', {
+        http: {
+            path: '/cancelllationPriceCalculate',
+            verb: 'POST'
+        },
+        accepts: [
+            {
+                arg: 'data',
+                type: 'object',
+                http: { source: 'body' }
+            }
+        ],
+        returns: { arg: 'response', type: 'object' }
+    });
+
+    Job.cancelJobByUser = function (data, cb) {
+        var response = {};
+        Job.findById(data.id, (err, res) => {
+            if (err) {
+                response.type = "Error";
+                response.message = err;
+                cb(null, response);
+            }
+            else {
+                const toUpdateJob = { id: data.id, status: 'CANCELLED', price: data.price };
+                Job.upsert(toUpdateJob, (err1, res1) => {
                     if (err1) {
                         response.type = "Error";
                         response.message = err1;
                         cb(null, response);
                     }
                     else {
-                        var toUpdateData = { id: data.id, status: data.status };
-                        Job.upsert(toUpdateData, (err, res) => {
-                            if (err) {
-                                response.type = "Error";
-                                response.message = err;
-                                cb(null, response);
-                            }
-                            else {
-                                toUpdateData = { jobId: data.id, workerId: "0", serviceId: res1.serviceId, status: "CANCELLED", reason: data.reason };
-                                Job.app.models.declinedJobs.upsert(toUpdateData, (errorRes, finalRes) => {
-                                    if (errorRes) {
-                                        response.type = "Error";
-                                        response.message = errorRes;
-                                        cb(null, response);
-                                    }
-                                    else {
-                                        if (res1.status == "STARTED") {
-                                            response.type = "SUCCESS";
-                                            response.message = "Job successfully cancelled with ZERO cancellation fee.";
-                                            cb(null, response);
-                                        }
-                                        else if (res1.status == "ACCEPTED") {
-                                            Job.app.models.Worker.findById(res1.workerId, (err2, res2) => {
-                                                if (err2) {
-                                                    response.type = "Error";
-                                                    response.message = err2;
-                                                    cb(null, response);
-                                                }
-                                                else {
-                                                    if (res2.deviceToken) {
-                                                        let title; let body;
-                                                        if (res2.language) {
-                                                            if (res2.language == "en") {
-                                                                title = "You job has been cancelled.";
-                                                                body = "Contact Admin for details."
-                                                            }
-                                                            else if (res2.language == "ar") {
-                                                                title = "تم إلغاء وظيفتك.";
-                                                                body = "اتصل بالمسؤول للحصول على التفاصيل."
-                                                            }
-                                                            else if (res2.language == "fr") {
-                                                                title = "Votre travail a été annulé.";
-                                                                body = "Contactez l'administrateur pour plus de détails."
-                                                            }
-                                                        }
-                                                        else {
-                                                            title = "You job has been cancelled.";
-                                                            body = "Contact Admin for details."
-                                                        }
-                                                        var message = {
-                                                            to: res2.deviceToken,
-                                                            data: {
-                                                                "screenType": "AvailableJobs",
-                                                                "jobId": data.id
-                                                            },
-                                                            notification: {
-                                                                title: title,
-                                                                body: body
-                                                            }
-                                                        };
-                                                        const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res1.workerId, jobId: data.id, IsToWorker: true };
-                                                        Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
-                                                            if (notError) {
-                                                                response.type = "error";
-                                                                response.message = notError;
-                                                                cb(null, response);
-                                                            }
-                                                            else {
-                                                                fcm.send(message, function (err, fcmResponse) {
-                                                                    if (err) {
-                                                                        response.type = "success";
-                                                                        response.message = "Job has been cancelled successfully.";
-                                                                        cb(null, response);
-                                                                    } else {
-                                                                        response.type = "success";
-                                                                        response.message = "Job has been cancelled successfully.";
-                                                                        cb(null, response);
-                                                                    }
-                                                                });
-                                                            }
-                                                        })
-
-                                                    }
-
-                                                }
-                                            })
-                                        }
-                                    }
-                                })
-
-                            }
-                        })
-                    }
-
-
-                }
-                else {
-                    const newDateUtc = newDate.toUTCString();
-                    const newDateTime = new Date(newDateUtc).getTime();
-                    const postedDateTime = new Date(res1.postedDate).getTime();
-                    let secondsDiff = (newDateTime - postedDateTime) / 1000;
-                    let hoursDiff = secondsDiff / 3600;
-                    let priceToCharge;
-                    data.price = Number(data.price);
-                    if (hoursDiff < 0) {
-                        priceToCharge = "0.0";
-                    }
-                    else if (hoursDiff > 24) {
-                        priceToCharge = "0.0";
-                    }
-                    else if (hoursDiff > 4 && hoursDiff < 24) {
-                        priceToCharge = priceToCharge;
-                    }
-                    else if (hoursDiff < 4) {
-                        priceToCharge = priceToCharge;
-                    }
-
-                    var toUpdateData1 = { id: data.id, status: data.status, priceToCharge: priceToCharge };
-                    Job.upsert(toUpdateData1, (err, res) => {
-                        if (err) {
-                            response.type = "Error";
-                            response.message = err;
-                            cb(null, response);
-                        }
-                        else {
-                            toUpdateData1 = { jobId: data.id, workerId: "0", serviceId: res1.serviceId, status: "CANCELLED", reason: data.reason };
-                            Job.app.models.declinedJobs.upsert(toUpdateData1, (fianlError, finalRes) => {
-                                if (fianlError) {
-                                    response.type = "Error";
-                                    response.message = fianlError;
+                        if (res && res.status == "ACCEPTED") {
+                            Job.app.models.Worker.findById(res.workerId, (err2, res2) => {
+                                if (err) {
+                                    response.type = "Success";
+                                    response.message = "Job Cancelled Successfully but colud'nt inform worker.";
                                     cb(null, response);
                                 }
                                 else {
-                                    if (res1.status == "STARTED") {
-                                        response.type = "SUCCESS";
-                                        response.message = "Job successfully cancelled with ZERO cancellation fee.";
-                                        cb(null, response);
-                                    }
-                                    else if (res1.status == "ACCEPTED") {
-
-                                        Job.app.models.Worker.findById(res1.workerId, (err2, res2) => {
-                                            if (err2) {
+                                    if (res2 && res2.deviceToken) {
+                                        let title; let body;
+                                        if (res2.language) {
+                                            if (res2.language == "en") {
+                                                title = "You job has been cancelled.";
+                                                body = "Contact Admin for details."
+                                            }
+                                            else if (res2.language == "ar") {
+                                                title = "تم إلغاء وظيفتك.";
+                                                body = "اتصل بالمسؤول للحصول على التفاصيل."
+                                            }
+                                            else if (res2.language == "fr") {
+                                                title = "Votre travail a été annulé.";
+                                                body = "Contactez l'administrateur pour plus de détails."
+                                            }
+                                        }
+                                        else {
+                                            title = "You job has been cancelled.";
+                                            body = "Contact Admin for details."
+                                        }
+                                        var message = {
+                                            to: res2.deviceToken,
+                                            data: {
+                                                "screenType": "AvailableJobs",
+                                                "jobId": data.id
+                                            },
+                                            notification: {
+                                                title: title,
+                                                body: body
+                                            }
+                                        };
+                                        const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res.workerId, jobId: data.id, IsToWorker: true };
+                                        Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
+                                            if (notError) {
                                                 response.type = "Error";
-                                                response.message = err2;
+                                                response.message = notError;
                                                 cb(null, response);
                                             }
                                             else {
-
-                                                if (res2.deviceToken) {
-                                                    var message = {
-                                                        to: res2.deviceToken,
-                                                        data: {
-                                                            "screenType": "AvailableJobs"
-                                                        },
-                                                        notification: {
-                                                            title: "You job has been cancelled.",
-                                                            body: "You job has been cancelled."
-                                                        }
-                                                    };
-                                                    fcm.send(message, function (err, fcmResponse) {
-                                                        if (err) {
-                                                            response.type = "error";
-                                                            response.message = err;
-                                                            cb(null, response);
-                                                        } else {
-                                                            response.type = "SUCCESS";
-                                                            response.message = "Job has been cancelled successfully.";
-                                                            cb(null, response);
-                                                        }
-                                                    });
-                                                }
-
+                                                fcm.send(message, function (err, fcmResponse) {
+                                                    if (err) {
+                                                        response.type = "Success";
+                                                        response.message = "Job has been cancelled successfully.";
+                                                        cb(null, response);
+                                                    } else {
+                                                        response.type = "Success";
+                                                        response.message = "Job has been cancelled successfully.";
+                                                        cb(null, response);
+                                                    }
+                                                });
                                             }
                                         })
                                     }
+                                    else {
+                                        response.type = "Success";
+                                        response.message = "Job Cancelled Successfully but colud'nt inform worker.";
+                                        cb(null, response);
+                                    }
+
                                 }
                             })
-
                         }
-                    })
-                }
-            })
-        } catch (error) {
-            response.type = "Error";
-            response.message = error;
-            cb(null, response);
-        }
+                        else {
+                            response.type = "Success";
+                            response.message = "Job Cancelled Successfully.";
+                            cb(null, response);
+                        }
+                    }
+                })
+            }
+        })
+        // try {
+        //     const postingTime = new Date(data.postingTime);
+        //     const newDate = new Date();
+        //     const seconds = (newDate.getTime() - postingTime.getTime()) / 1000;
+        //     const minutes = seconds / 60;
+        //     Job.findById(data.id, (err1, res1) => {
+        //         if (minutes <= 5) {
+
+
+        //             if (err1) {
+        //                 response.type = "Error";
+        //                 response.message = err1;
+        //                 cb(null, response);
+        //             }
+        //             else {
+        //                 var toUpdateData = { id: data.id, status: data.status };
+        //                 Job.upsert(toUpdateData, (err, res) => {
+        //                     if (err) {
+        //                         response.type = "Error";
+        //                         response.message = err;
+        //                         cb(null, response);
+        //                     }
+        //                     else {
+        //                         toUpdateData = { jobId: data.id, workerId: "0", serviceId: res1.serviceId, status: "CANCELLED", reason: data.reason };
+        //                         Job.app.models.declinedJobs.upsert(toUpdateData, (errorRes, finalRes) => {
+        //                             if (errorRes) {
+        //                                 response.type = "Error";
+        //                                 response.message = errorRes;
+        //                                 cb(null, response);
+        //                             }
+        //                             else {
+        //                                 if (res1.status == "STARTED") {
+        //                                     response.type = "SUCCESS";
+        //                                     response.message = "Job successfully cancelled with ZERO cancellation fee.";
+        //                                     cb(null, response);
+        //                                 }
+        //                                 else if (res1.status == "ACCEPTED") {
+        //                                     Job.app.models.Worker.findById(res1.workerId, (err2, res2) => {
+        //                                         if (err2) {
+        //                                             response.type = "Error";
+        //                                             response.message = err2;
+        //                                             cb(null, response);
+        //                                         }
+        //                                         else {
+        //                                             if (res2.deviceToken) {
+        //                                                 let title; let body;
+        //                                                 if (res2.language) {
+        //                                                     if (res2.language == "en") {
+        //                                                         title = "You job has been cancelled.";
+        //                                                         body = "Contact Admin for details."
+        //                                                     }
+        //                                                     else if (res2.language == "ar") {
+        //                                                         title = "تم إلغاء وظيفتك.";
+        //                                                         body = "اتصل بالمسؤول للحصول على التفاصيل."
+        //                                                     }
+        //                                                     else if (res2.language == "fr") {
+        //                                                         title = "Votre travail a été annulé.";
+        //                                                         body = "Contactez l'administrateur pour plus de détails."
+        //                                                     }
+        //                                                 }
+        //                                                 else {
+        //                                                     title = "You job has been cancelled.";
+        //                                                     body = "Contact Admin for details."
+        //                                                 }
+        //                                                 var message = {
+        //                                                     to: res2.deviceToken,
+        //                                                     data: {
+        //                                                         "screenType": "AvailableJobs",
+        //                                                         "jobId": data.id
+        //                                                     },
+        //                                                     notification: {
+        //                                                         title: title,
+        //                                                         body: body
+        //                                                     }
+        //                                                 };
+        //                                                 const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res1.workerId, jobId: data.id, IsToWorker: true };
+        //                                                 Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
+        //                                                     if (notError) {
+        //                                                         response.type = "error";
+        //                                                         response.message = notError;
+        //                                                         cb(null, response);
+        //                                                     }
+        //                                                     else {
+        //                                                         fcm.send(message, function (err, fcmResponse) {
+        //                                                             if (err) {
+        //                                                                 response.type = "success";
+        //                                                                 response.message = "Job has been cancelled successfully.";
+        //                                                                 cb(null, response);
+        //                                                             } else {
+        //                                                                 response.type = "success";
+        //                                                                 response.message = "Job has been cancelled successfully.";
+        //                                                                 cb(null, response);
+        //                                                             }
+        //                                                         });
+        //                                                     }
+        //                                                 })
+
+        //                                             }
+
+        //                                         }
+        //                                     })
+        //                                 }
+        //                             }
+        //                         })
+
+        //                     }
+        //                 })
+        //             }
+
+
+        //         }
+        //         else {
+        //             const newDateUtc = newDate.toUTCString();
+        //             const newDateTime = new Date(newDateUtc).getTime();
+        //             const postedDateTime = new Date(res1.postedDate).getTime();
+        //             let secondsDiff = (newDateTime - postedDateTime) / 1000;
+        //             let hoursDiff = secondsDiff / 3600;
+        //             let priceToCharge;
+        //             data.price = Number(data.price);
+        //             if (hoursDiff < 0) {
+        //                 priceToCharge = "0.0";
+        //             }
+        //             else if (hoursDiff > 24) {
+        //                 priceToCharge = "0.0";
+        //             }
+        //             else if (hoursDiff > 4 && hoursDiff < 24) {
+        //                 priceToCharge = priceToCharge;
+        //             }
+        //             else if (hoursDiff < 4) {
+        //                 priceToCharge = priceToCharge;
+        //             }
+
+        //             var toUpdateData1 = { id: data.id, status: data.status, priceToCharge: priceToCharge };
+        //             Job.upsert(toUpdateData1, (err, res) => {
+        //                 if (err) {
+        //                     response.type = "Error";
+        //                     response.message = err;
+        //                     cb(null, response);
+        //                 }
+        //                 else {
+        //                     toUpdateData1 = { jobId: data.id, workerId: "0", serviceId: res1.serviceId, status: "CANCELLED", reason: data.reason };
+        //                     Job.app.models.declinedJobs.upsert(toUpdateData1, (fianlError, finalRes) => {
+        //                         if (fianlError) {
+        //                             response.type = "Error";
+        //                             response.message = fianlError;
+        //                             cb(null, response);
+        //                         }
+        //                         else {
+        //                             if (res1.status == "STARTED") {
+        //                                 response.type = "SUCCESS";
+        //                                 response.message = "Job successfully cancelled with ZERO cancellation fee.";
+        //                                 cb(null, response);
+        //                             }
+        //                             else if (res1.status == "ACCEPTED") {
+
+        //                                 Job.app.models.Worker.findById(res1.workerId, (err2, res2) => {
+        //                                     if (err2) {
+        //                                         response.type = "Error";
+        //                                         response.message = err2;
+        //                                         cb(null, response);
+        //                                     }
+        //                                     else {
+
+        //                                         if (res2.deviceToken) {
+        //                                             var message = {
+        //                                                 to: res2.deviceToken,
+        //                                                 data: {
+        //                                                     "screenType": "AvailableJobs"
+        //                                                 },
+        //                                                 notification: {
+        //                                                     title: "You job has been cancelled.",
+        //                                                     body: "You job has been cancelled."
+        //                                                 }
+        //                                             };
+        //                                             fcm.send(message, function (err, fcmResponse) {
+        //                                                 if (err) {
+        //                                                     response.type = "error";
+        //                                                     response.message = err;
+        //                                                     cb(null, response);
+        //                                                 } else {
+        //                                                     response.type = "SUCCESS";
+        //                                                     response.message = "Job has been cancelled successfully.";
+        //                                                     cb(null, response);
+        //                                                 }
+        //                                             });
+        //                                         }
+
+        //                                     }
+        //                                 })
+        //                             }
+        //                         }
+        //                     })
+
+        //                 }
+        //             })
+        //         }
+        //     })
+        // } catch (error) {
+        //     response.type = "Error";
+        //     response.message = error;
+        //     cb(null, response);
+        // }
 
 
 
@@ -2376,118 +2557,202 @@ module.exports = function (Job) {
     Job.completeJob = function (data, cb) {
 
         var response = {};
-
-        Job.app.models.Worker.findById(data.workerId, (err1, res1) => {
-            if (err1) {
-                response.type = "Error";
-                response.message = err1;
-                cb(null, response);
-            }
-            else {
-                if (res1.deviceToken) {
-                    let title; let body;
-                    if (data.language == "en") {
-                        title = "Your job is completed.";
-                        body = "Thank  you for choosing for the service."
-                    }
-                    else if (data.language == "ar") {
-                        title = "اكتملت وظيفتك.";
-                        body = "شكرا لاختيارك للخدمة."
-                    }
-                    else if (data.language == "fr") {
-                        title = "Votre travail est terminé.";
-                        body = "Merci d'avoir choisi pour le service."
-                    }
-                    var message = {
-                        to: res1.deviceToken,
-                        data: {
-                            "screenType": "JobDetails",
-                            "jobId": data.id
-                        },
-                        notification: {
-                            title: title,
-                            body: body
-                        }
-                    };
-                    let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
-                    Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
-                        fcm.send(message, function (err, fcmResponse) {
-                            if (err) {
-                                response.type = "error";
-                                response.message = err;
-                                cb(null, response);
-                            } else {
-                                Job.app.models.Service.findById(data.serviceId, (err2, res2) => {
-                                    if (err2) {
-                                        response.type = "Error";
-                                        response.message = err2;
-                                        cb(null, response);
-                                    }
-                                    else {
-                                        var definedTime = res2.time_interval;
-                                        var actualTime = Number(data.actualTime);
-                                        var price;
-                                        if (actualTime == res2.time_interval) {
-                                            price = data.price;
-                                        }
-                                        else if (actualTime > res2.time_interval) {
-                                            var noOfBrackets = actualTime / 15;
-                                            var finalNoOfBrackets = Math.ceil(noOfBrackets);
-                                            var chargePerHourForBracket = res2.cost_per_hour / 4;
-                                            var finalCost = chargePerHourForBracket * finalNoOfBrackets;
-                                            if (finalCost < res2.min_charge) {
-                                                finalCost = res2.min_charge;
-                                            }
-                                            price = finalCost;
-                                        }
-                                        else {
-                                            var noOfBrackets = actualTime / 15;
-                                            var finalNoOfBrackets = Math.ceil(noOfBrackets);
-                                            var chargePerHourForBracket = res2.cost_per_hour / 4;
-                                            var finalCost = chargePerHourForBracket * finalNoOfBrackets;
-                                            if (finalCost < res2.min_charge) {
-                                                finalCost = res2.min_charge;
-                                            }
-                                            price = finalCost;
-                                        }
-                                        const data = { status: data.status, id: data.id, price: price };
-                                        Job.upsert(data, (jobError, jobSuccess) => {
-                                            Job.app.models.jobTrackerStatus.update({ jobId: data.id, is_active: 0 }, (statusError, statusSuccess) => {
-                                                if (statusError) {
-                                                    response.type = "Error";
-                                                    response.message = "Error in updating job status.";
-                                                    response.price = price;
-                                                    cb(null, response);
-                                                }
-                                                else {
-                                                    let toInsertData = { jobId: data.id, status: data.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
-                                                    Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
-                                                        response.type = "Success";
-                                                        response.message = "Job Completed.";
-                                                        response.price = price;
-                                                        cb(null, response);
-                                                    })
-                                                }
-                                            })
-                                        })
-
-
-
-                                    }
-                                })
-
-                            }
-                        });
-                    })
-
-                }
-                else {
-                    response.type = "Success";
-                    response.message = "Job Completd but couldn't inform customer";
+        console.log("hello", data);
+        const requestData = data;
+        if (data.status == 'PAYPENDING') {
+            Job.app.models.Customer.findById(data.customerId, (err1, res1) => {
+                if (err1) {
+                    response.type = "Error";
+                    response.message = err1;
                     cb(null, response);
                 }
-            }
-        })
+                else {
+                    console.log("pragati", data);
+                    if (res1.deviceToken) {
+                        let title; let body;
+                        if (data.language == "en") {
+                            title = "Your job is completed.";
+                            body = "Thank  you for choosing for the service."
+                        }
+                        else if (data.language == "ar") {
+                            title = "اكتملت وظيفتك.";
+                            body = "شكرا لاختيارك للخدمة."
+                        }
+                        else if (data.language == "fr") {
+                            title = "Votre travail est terminé.";
+                            body = "Merci d'avoir choisi pour le service."
+                        }
+                        var message = {
+                            to: res1.deviceToken,
+                            data: {
+                                "screenType": "JobDetails",
+                                "jobId": data.id
+                            },
+                            notification: {
+                                title: title,
+                                body: body
+                            }
+                        };
+                        let notificationInsertData = { notificationType: data.status, notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: data.customerId, jobId: data.id, IsToWorker: false, IsRead: 0 };
+                        Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
+                            fcm.send(message, function (err, fcmResponse) {
+                                if (err) {
+                                    response.type = "error";
+                                    response.message = err;
+                                    cb(null, response);
+                                } else {
+                                    console.log("hello2")
+                                    Job.app.models.Service.findById(data.serviceId, (err2, res2) => {
+                                        if (err2) {
+                                            response.type = "Error";
+                                            response.message = err2;
+                                            cb(null, response);
+                                        }
+                                        else {
+                                            var definedTime = res2.time_interval;
+                                            var actualTime = Number(requestData.actualTime);
+                                            var price;
+                                            if (actualTime == res2.time_interval) {
+                                                price = requestData.price;
+                                            }
+                                            else if (actualTime > res2.time_interval) {
+                                                var noOfBrackets = actualTime / 15;
+                                                var finalNoOfBrackets = Math.ceil(noOfBrackets);
+                                                var chargePerHourForBracket = res2.cost_per_hour / 4;
+                                                var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+                                                if (finalCost < res2.min_charge) {
+                                                    finalCost = res2.min_charge;
+                                                }
+                                                price = finalCost;
+                                            }
+                                            else {
+                                                var noOfBrackets = actualTime / 15;
+                                                var finalNoOfBrackets = Math.ceil(noOfBrackets);
+                                                var chargePerHourForBracket = res2.cost_per_hour / 4;
+                                                var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+                                                if (finalCost < res2.min_charge) {
+                                                    finalCost = res2.min_charge;
+                                                }
+                                                price = finalCost;
+                                            }
+                                            const data4 = { status: requestData.status, id: requestData.id, price: price };
+                                            console.log("price", price);
+                                            Job.upsert(data4, (jobError, jobSuccess) => {
+                                                Job.app.models.jobTrackerStatus.update({ jobId: requestData.id, is_active: 0 }, (statusError, statusSuccess) => {
+                                                    if (statusError) {
+                                                        response.type = "Error";
+                                                        response.message = "Error in updating job status.";
+                                                        response.price = price;
+                                                        cb(null, response);
+                                                    }
+                                                    else {
+                                                        let toInsertData = { jobId: requestData.id, status: requestData.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                                                        Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+                                                            response.type = "Success";
+                                                            response.message = "Job Completed.";
+                                                            response.price = price;
+                                                            cb(null, response);
+                                                        })
+                                                    }
+                                                })
+                                            })
+
+
+
+                                        }
+                                    })
+
+                                }
+                            });
+                        })
+
+                    }
+                    else {
+                        console.log("hello3")
+                        Job.app.models.Service.findById(requestData.serviceId, (err2, res2) => {
+                            if (err2) {
+                                response.type = "Error";
+                                response.message = err2;
+                                cb(null, response);
+                            }
+                            else {
+                                var definedTime = res2.time_interval;
+                                var actualTime = Number(requestData.actualTime);
+                                var price;
+                                if (actualTime == res2.time_interval) {
+                                    price = requestData.price;
+                                }
+                                else if (actualTime > res2.time_interval) {
+                                    var noOfBrackets = actualTime / 15;
+                                    var finalNoOfBrackets = Math.ceil(noOfBrackets);
+                                    var chargePerHourForBracket = res2.cost_per_hour / 4;
+                                    var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+                                    if (finalCost < res2.min_charge) {
+                                        finalCost = res2.min_charge;
+                                    }
+                                    price = finalCost;
+                                }
+                                else {
+                                    var noOfBrackets = actualTime / 15;
+                                    var finalNoOfBrackets = Math.ceil(noOfBrackets);
+                                    var chargePerHourForBracket = res2.cost_per_hour / 4;
+                                    var finalCost = chargePerHourForBracket * finalNoOfBrackets;
+                                    if (finalCost < res2.min_charge) {
+                                        finalCost = res2.min_charge;
+                                    }
+                                    price = finalCost;
+                                }
+                                const data8 = { status: requestData.status, id: requestData.id, price: price };
+                                console.log("price", price);
+                                Job.upsert(data8, (jobError, jobSuccess) => {
+                                    Job.app.models.jobTrackerStatus.update({ jobId: requestData.id, is_active: 0 }, (statusError, statusSuccess) => {
+                                        if (statusError) {
+                                            response.type = "Error";
+                                            response.message = "Error in updating job status.";
+                                            response.price = price;
+                                            cb(null, response);
+                                        }
+                                        else {
+                                            let toInsertData = { jobId: requestData.id, status: requestData.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                                            Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+                                                response.type = "Success";
+                                                response.message = "Job Completed.";
+                                                response.price = price;
+                                                cb(null, response);
+                                            })
+                                        }
+                                    })
+                                })
+
+
+
+                            }
+                        })
+                    }
+                }
+            })
+        }
+        else {
+            const data9 = { status: requestData.status, id: requestData.id };
+            Job.upsert(data9, (jobError, jobSuccess) => {
+                Job.app.models.jobTrackerStatus.update({ jobId: requestData.id, is_active: 0 }, (statusError, statusSuccess) => {
+                    if (statusError) {
+                        response.type = "Error";
+                        response.message = "Error in updating job status.";
+                        cb(null, response);
+                    }
+                    else {
+                        let toInsertData = { jobId: requestData.id, status: requestData.status, statusChangeddate: new Date().toUTCString(), is_active: 1 };
+                        Job.app.models.jobTrackerStatus.create(toInsertData, (finalError, finalSuccess) => {
+                            response.type = "Success";
+                            response.message = "Job Completed.";
+                            cb(null, response);
+                        })
+                    }
+                })
+            })
+        }
+
 
 
 

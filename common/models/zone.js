@@ -5,7 +5,7 @@ module.exports = function(Zone) {
 
 
     var filter = {
-      where: {zoneId: 0}
+      where: { zoneId: 0, is_active:1}
     };
 
     return Zone.find(filter).then(function(empl) {
