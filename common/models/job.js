@@ -360,7 +360,7 @@ module.exports = function (Job) {
                                             cb(null, response);
                                         }
                                         else {
-                                         console.log("pragati");
+                                            console.log("pragati");
                                             Job.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job", "currency"] }, (err3, res3) => {
                                                 if (err3) {
                                                     response.type = "Error";
@@ -1890,7 +1890,7 @@ module.exports = function (Job) {
                             // const postedDateTime = new Date(res1.postingTime).getTime();
                             // let secondsDiff = (newDateTime - postedDateTime) / 1000;
                             // let hoursDiff = secondsDiff / 3600;
-                            let hoursDiff=minutes/60;
+                            let hoursDiff = minutes / 60;
                             console.log("hoursDiff", hoursDiff);
                             let priceToCharge;
                             data.price = Number(data.price);
@@ -1955,91 +1955,99 @@ module.exports = function (Job) {
                 cb(null, response);
             }
             else {
-                const toUpdateJob = { id: data.id, status: 'CANCELLED', price: data.price };
-                Job.upsert(toUpdateJob, (err1, res1) => {
-                    if (err1) {
-                        response.type = "Error";
-                        response.message = err1;
-                        cb(null, response);
-                    }
-                    else {
-                        if (res && res.status == "ACCEPTED") {
-                            Job.app.models.Worker.findById(res.workerId, (err2, res2) => {
-                                if (err) {
-                                    response.type = "Success";
-                                    response.message = "Job Cancelled Successfully but colud'nt inform worker.";
-                                    cb(null, response);
-                                }
-                                else {
-                                    if (res2 && res2.deviceToken) {
-                                        let title; let body;
-                                        if (res2.language) {
-                                            if (res2.language == "en") {
-                                                title = "You job has been cancelled.";
-                                                body = "Contact Admin for details."
-                                            }
-                                            else if (res2.language == "ar") {
-                                                title = "تم إلغاء وظيفتك.";
-                                                body = "اتصل بالمسؤول للحصول على التفاصيل."
-                                            }
-                                            else if (res2.language == "fr") {
-                                                title = "Votre travail a été annulé.";
-                                                body = "Contactez l'administrateur pour plus de détails."
-                                            }
-                                        }
-                                        else {
-                                            title = "You job has been cancelled.";
-                                            body = "Contact Admin for details."
-                                        }
-                                        var message = {
-                                            to: res2.deviceToken,
-                                            data: {
-                                                "screenType": "AvailableJobs",
-                                                "jobId": data.id
-                                            },
-                                            notification: {
-                                                title: title,
-                                                body: body
-                                            }
-                                        };
-                                        const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res.workerId, jobId: data.id, IsToWorker: true };
-                                        Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
-                                            if (notError) {
-                                                response.type = "Error";
-                                                response.message = notError;
-                                                cb(null, response);
-                                            }
-                                            else {
-                                                fcm.send(message, function (err, fcmResponse) {
-                                                    if (err) {
-                                                        response.type = "Success";
-                                                        response.message = "Job has been cancelled successfully.";
-                                                        cb(null, response);
-                                                    } else {
-                                                        response.type = "Success";
-                                                        response.message = "Job has been cancelled successfully.";
-                                                        cb(null, response);
-                                                    }
-                                                });
-                                            }
-                                        })
-                                    }
-                                    else {
+                if (res && res.status == "CANCELLED") {
+                    response.type = "Error";
+                    response.message = "You have already cancelled this job.";
+                    cb(null, response);
+                }
+                else {
+                    const toUpdateJob = { id: data.id, status: 'CANCELLED', price: data.price };
+                    Job.upsert(toUpdateJob, (err1, res1) => {
+                        if (err1) {
+                            response.type = "Error";
+                            response.message = err1;
+                            cb(null, response);
+                        }
+                        else {
+                            if (res && res.status == "ACCEPTED") {
+                                Job.app.models.Worker.findById(res.workerId, (err2, res2) => {
+                                    if (err) {
                                         response.type = "Success";
                                         response.message = "Job Cancelled Successfully but colud'nt inform worker.";
                                         cb(null, response);
                                     }
+                                    else {
+                                        if (res2 && res2.deviceToken) {
+                                            let title; let body;
+                                            if (res2.language) {
+                                                if (res2.language == "en") {
+                                                    title = "You job has been cancelled.";
+                                                    body = "Contact Admin for details."
+                                                }
+                                                else if (res2.language == "ar") {
+                                                    title = "تم إلغاء وظيفتك.";
+                                                    body = "اتصل بالمسؤول للحصول على التفاصيل."
+                                                }
+                                                else if (res2.language == "fr") {
+                                                    title = "Votre travail a été annulé.";
+                                                    body = "Contactez l'administrateur pour plus de détails."
+                                                }
+                                            }
+                                            else {
+                                                title = "You job has been cancelled.";
+                                                body = "Contact Admin for details."
+                                            }
+                                            var message = {
+                                                to: res2.deviceToken,
+                                                data: {
+                                                    "screenType": "AvailableJobs",
+                                                    "jobId": data.id
+                                                },
+                                                notification: {
+                                                    title: title,
+                                                    body: body
+                                                }
+                                            };
+                                            const notificationInsertData = { notificationType: "JobCancel", notificationDate: new Date().toUTCString(), title: message.notification.title, sentIds: res.workerId, jobId: data.id, IsToWorker: true };
+                                            Job.app.models.Notifications.create(notificationInsertData, (notError, notSuccess) => {
+                                                if (notError) {
+                                                    response.type = "Error";
+                                                    response.message = notError;
+                                                    cb(null, response);
+                                                }
+                                                else {
+                                                    fcm.send(message, function (err, fcmResponse) {
+                                                        if (err) {
+                                                            response.type = "Success";
+                                                            response.message = "Job has been cancelled successfully.";
+                                                            cb(null, response);
+                                                        } else {
+                                                            response.type = "Success";
+                                                            response.message = "Job has been cancelled successfully.";
+                                                            cb(null, response);
+                                                        }
+                                                    });
+                                                }
+                                            })
+                                        }
+                                        else {
+                                            response.type = "Success";
+                                            response.message = "Job Cancelled Successfully but colud'nt inform worker.";
+                                            cb(null, response);
+                                        }
 
-                                }
-                            })
+                                    }
+                                })
+                            }
+                            else {
+                                response.type = "Success";
+                                response.message = "Job Cancelled Successfully.";
+                                cb(null, response);
+                            }
                         }
-                        else {
-                            response.type = "Success";
-                            response.message = "Job Cancelled Successfully.";
-                            cb(null, response);
-                        }
-                    }
-                })
+                    })
+                }
+
             }
         })
         // try {

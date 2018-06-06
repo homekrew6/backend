@@ -1,35 +1,35 @@
 {
-    "name": "Setting",
-    "base": "PersistedModel",
-    "idInjection": true,
-    "options": {
-        "validateUpsert": true
+  "name": "Setting",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "site_name": {
+      "type": "string"
     },
-    "properties": {
-        "site_name": {
-            "type": "string"
-        },
-        "site_email": {
-            "type": "string"
-        },
-        "address": {
-            "type": "string"
-        },
-        "phone": {
-            "type": "string"
-        },
-        "minimumPostingDiff": {
-            "type": "number",
-            "required": false
-        },
-        "perHourFollowUpCharge": {
-            "type": "number",
-            "required": false,
-            "default": 50
-        }
+    "site_email": {
+      "type": "string"
     },
-    "validations": [],
-    "relations": {},
-    "acls": [],
-    "methods": {}
+    "address": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "minimumPostingDiff": {
+      "type": "number",
+      "required": false
+    },
+    "perHourFollowUpCharge": {
+      "type": "number",
+      "required": false,
+      "default": 50
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
 }

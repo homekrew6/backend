@@ -251,5 +251,9 @@
   "adminZone": {
     "dataSource": "mysql",
     "public": true
+  },
+  "AdminTemp": {
+    "dataSource": "mysql",
+    "public": true
   }
 }

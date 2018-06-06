@@ -33,7 +33,7 @@ module.exports = function (Customer) {
     var to = customer.email;
     var subject = 'Successfully Registered';
     var text = 'text';
-    customer.language="en";
+    customer.language = "en";
     var html = 'Hi,<br>Your account has been successfully registered with us<br><br>Regards,<br>Krew Team';
     Customer.upsert(customer, function (err, res) {
       var message = {
@@ -144,6 +144,42 @@ module.exports = function (Customer) {
     returns: { arg: 'customer', type: 'object' }
   });
 
+
+  Customer.sendEmailForPasswordChange = function (data, cb) {
+    var response = {};
+    Customer.app.models.EmailSend.send({
+      to: data.to,
+      from: 'mail@natitsolved.com',
+      subject: data.subject,
+      text: data.text ? data.text : '',
+      html: data.html
+    }, function (err, mail) {
+
+      //cb(err);
+      if (!err) {
+
+        response.success = true;
+        cb(null, response);
+      } else {
+        response.success = false;
+        cb(null, response);
+      }
+
+    });
+  }
+
+  Customer.remoteMethod('sendEmailForPasswordChange', {
+    http: { path: '/sendEmailForPasswordChange', verb: 'post' },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
+
   Customer.approveChecking = function (customer, cb) {
     Customer.findOne({ where: { email: customer.email } }, function (err, res) {
       if (res) {
@@ -169,23 +205,40 @@ module.exports = function (Customer) {
   Customer.on('resetPasswordRequest', function (info) {
 
 
-    var to = info.email;
-    var acces_token = info.accessToken.id;
-    var subject = 'OTP for reset password';
-    var text = 'text';
-    var otp = Math.floor(1000 + Math.random() * 9000);
-    var html = 'Hi,<br>OTP : ' + otp + '<br><br>Regards,<br>Krew Team';
-    var temp = {
-      otp: otp,
-      email: to,
-      access_token: acces_token
-    }
-    Customer.app.models.UserTemp.upsert(temp, function (err, res) {
-      Customer.sendEmail(to, subject, text, html, function (cb) {
+    if (info.options.IsFromAdmin) {
+      var temp = {
+        email: info.email,
+        access_token: info.accessToken.id
+      }
+      Customer.app.models.AdminTemp.upsert(temp, function (err, res) {
 
       });
-    });
+    }
+    else {
+      var to = info.email;
+      var acces_token = info.accessToken.id;
+      var subject = 'OTP for reset password';
+      var text = 'text';
+      var otp = Math.floor(1000 + Math.random() * 9000);
+      var html = 'Hi,<br>OTP : ' + otp + '<br><br>Regards,<br>Krew Team';
+      var temp = {
+        otp: otp,
+        email: to,
+        access_token: acces_token
+      }
+      Customer.app.models.UserTemp.upsert(temp, function (err, res) {
+        Customer.sendEmail(to, subject, text, html, function (cb) {
+
+        });
+      });
+    }
+
   });
+
+
+  Customer.sendAccessToken = function (data, cb) {
+    cb(null, data);
+  }
 
   Customer.otpChecking = function (user, cb) {
 
@@ -300,45 +353,38 @@ module.exports = function (Customer) {
 
 
 
-  Customer.checkIfPaymentPending=function(data, cb)
-  {
-    var response={};
-    Customer.app.models.Job.find({where:{customerId:data.id, status:'PAYPENDING'}}, (err, res)=>{
-    if(err)
-    {
-      response.type="Error";
-      response.message=err;
-      cb(null, response);
-    }
-    else
-    {
-      if(res.length>0)
-      {
-        response.type="Success";
-        response.IsPayPending=true;
-        let message1;
-        if(data.language=="en")
-        {
-          message1="Please pay the pending amount to post another job.";
-        }
-        else if(data.language=="ar")
-        {
-          message1 ="يرجى دفع المبلغ المعلق لنشر وظيفة أخرى.";
-        }
-        else if (data.language == "fr") {
-          message1 = "Veuillez payer le montant en attente pour publier un autre travail.";
-        }
+  Customer.checkIfPaymentPending = function (data, cb) {
+    var response = {};
+    Customer.app.models.Job.find({ where: { customerId: data.id, status: 'PAYPENDING' } }, (err, res) => {
+      if (err) {
+        response.type = "Error";
+        response.message = err;
+        cb(null, response);
+      }
+      else {
+        if (res.length > 0) {
+          response.type = "Success";
+          response.IsPayPending = true;
+          let message1;
+          if (data.language == "en") {
+            message1 = "Please pay the pending amount to post another job.";
+          }
+          else if (data.language == "ar") {
+            message1 = "يرجى دفع المبلغ المعلق لنشر وظيفة أخرى.";
+          }
+          else if (data.language == "fr") {
+            message1 = "Veuillez payer le montant en attente pour publier un autre travail.";
+          }
 
-        response.message=message1;
-        cb(null, response);
+          response.message = message1;
+          cb(null, response);
+        }
+        else {
+          response.type = "Success";
+          response.IsPayPending = false;
+          cb(null, response);
+        }
       }
-      else 
-      {
-        response.type="Success";
-        response.IsPayPending=false;
-        cb(null, response);
-      }
-    }
     });
   }
 

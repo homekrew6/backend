@@ -1,97 +1,100 @@
 {
-  "name": "Job",
-  "base": "PersistedModel",
-  "idInjection": true,
-  "options": {
-    "validateUpsert": true
-  },
-  "properties": {
-    "price": {
-      "type": "string"
+    "name": "Job",
+    "base": "PersistedModel",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
     },
-    "postedDate": {
-      "type": "string",
-      "required": false
+    "properties": {
+        "price": {
+            "type": "string"
+        },
+        "postedDate": {
+            "type": "string",
+            "required": false
+        },
+        "payment": {
+            "type": "string"
+        },
+        "faourite_sp": {
+            "type": "string"
+        },
+        "promo_code": {
+            "type": "string"
+        },
+        "status": {
+            "type": "string",
+            "required": false
+        },
+        "postingTime": {
+            "type": "date",
+            "required": false
+        },
+        "priceToCharge": {
+            "type": "string",
+            "required": false
+        },
+        "IsRescheduled": {
+            "type": "boolean",
+            "required": false,
+            "default": false
+        },
+        "expectedTimeInterval": {
+            "type": "number",
+            "required": false
+        },
+        "promoPrice": {
+            "type": "string"
+        },
+        "orderId": {
+            "type": "string"
+        },
+        "IsPaid": {
+            "type": "boolean",
+            "default": false
+        },
+        "onMyWayTime": {
+            "type": "string"
+        }
     },
-    "payment": {
-      "type": "string"
+    "validations": [],
+    "relations": {
+        "customer": {
+            "type": "belongsTo",
+            "model": "Customer",
+            "foreignKey": ""
+        },
+        "currency": {
+            "type": "belongsTo",
+            "model": "Currency",
+            "foreignKey": ""
+        },
+        "worker": {
+            "type": "belongsTo",
+            "model": "Worker",
+            "foreignKey": ""
+        },
+        "zone": {
+            "type": "belongsTo",
+            "model": "Zone",
+            "foreignKey": ""
+        },
+        "service": {
+            "type": "belongsTo",
+            "model": "service",
+            "foreignKey": ""
+        },
+        "userLocation": {
+            "type": "belongsTo",
+            "model": "user-location",
+            "foreignKey": ""
+        },
+        "jobMaterial": {
+            "type": "belongsTo",
+            "model": "jobMaterial",
+            "foreignKey": ""
+        }
     },
-    "faourite_sp": {
-      "type": "string"
-    },
-    "promo_code": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string",
-      "required": false
-    },
-    "postingTime": {
-      "type": "date",
-      "required": false
-    },
-    "priceToCharge": {
-      "type": "string",
-      "required": false
-    },
-    "IsRescheduled": {
-      "type": "boolean",
-      "required": false,
-      "default": false
-    },
-    "expectedTimeInterval": {
-      "type": "number",
-      "required": false
-    },
-    "promoPrice": {
-      "type": "string"
-    },
-    "orderId": {
-      "type": "string"
-    },
-    "IsPaid": {
-      "type": "boolean",
-      "default": false
-    }
-  },
-  "validations": [],
-  "relations": {
-    "customer": {
-      "type": "belongsTo",
-      "model": "Customer",
-      "foreignKey": ""
-    },
-    "currency": {
-      "type": "belongsTo",
-      "model": "Currency",
-      "foreignKey": ""
-    },
-    "worker": {
-      "type": "belongsTo",
-      "model": "Worker",
-      "foreignKey": ""
-    },
-    "zone": {
-      "type": "belongsTo",
-      "model": "Zone",
-      "foreignKey": ""
-    },
-    "service": {
-      "type": "belongsTo",
-      "model": "service",
-      "foreignKey": ""
-    },
-    "userLocation": {
-      "type": "belongsTo",
-      "model": "user-location",
-      "foreignKey": ""
-    },
-    "jobMaterial": {
-      "type": "belongsTo",
-      "model": "jobMaterial",
-      "foreignKey": ""
-    }
-  },
-  "acls": [],
-  "methods": {}
+    "acls": [],
+    "methods": {}
 }
