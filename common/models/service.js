@@ -275,53 +275,61 @@ module.exports = function (Service) {
 
   
 
-  // Service.calculatePrice = function (data, cb) {
+  Service.deleteServiceandSendMail = function (data, cb) {
+    var response = {};
+    console.log("deleteServiceandSendMail", data);
+    Service.app.models.Customer.findById(data.customerId, (custErr, custRes)=>{
+      if (custErr)
+      {
+        response.type = "Error";
+        response.message = custErr;
+        cb(null, response);
+      }
+      else
+      {
+        var to = custRes.email;
+        var subject = "Your job's service Deleted By Admin";
+        var text = 'text';
+        var html = "Hi,<br>Your job's service has been deleted by Admin. Please contact admin for details.<br><br>Regards,<br>Krew Team";
+        if (data.id) {
+          Service.destroyById(data.id, (err, res) => {
+            if (err) {
+              response.type = "Error";
+              response.message = err;
+              cb(null, response);
+            }
+            else {
+              response.type = "Success";
+              response.message = res;
+              Service.app.models.Customer.sendEmail(to, subject, text, html, function (cb) {
 
-  //   var response;
-
-  //   Service.app.models.Question.find({ where: { "serviceId": data.id }  }, (err, res) => {
-  //     if (err) {
-  //       response.type = "error";
-  //       response.message = "Please try again later.";
-  //       cb(null, response);
-  //     }
-  //     if (res.length > 0) {
-  //       for (var i = 0; i < res.length; i++) {
-  //         console.log("res",res[i]);
-  //       Service.app.models.Answer.find({where:{"questionId":res[i].id}},(err1,res1)=>{
-  //        if(err1)
-  //        {
-
-  //        }
-  //        console.log("res1",res1);
-  //       })
-  //       }
-  //     }
-  //     else {
-  //       response.type = "error";
-  //       response.message = "No questions available for this question.";
-  //       cb(null, response);
-  //     }
-
-  //   })
+              });
+              cb(null, response);
+            }
+          })
+        
+        }
+        else {
+          response.type = "Error";
+          response.message = "Please select the agent to delete.";
+          cb(null, response);
+        }
+      }
+    })
+   
 
 
-  // }
-  // Service.remoteMethod('calculatePrice', {
-  //   http: {
-  //     path: '/calculatePrice',
-  //     verb: 'post'
-  //   },
-  //   accepts: [
-  //     {
-  //       arg: 'data',
-  //       type: 'object',
-  //       http: { source: 'body' }
-  //     }
-  //   ],
-  //   returns: {
-  //     arg: 'response',
-  //     type: 'object'
-  //   }
-  // });
+  }
+
+  Service.remoteMethod('deleteServiceandSendMail', {
+    http: { path: '/deleteServiceandSendMail', verb: 'POST' },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
 };

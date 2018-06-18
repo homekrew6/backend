@@ -466,6 +466,7 @@ module.exports = function (Job) {
                                                         cb(null, response);
                                                     }
                                                     else {
+                                                        
                                                         for (let i = 0; i < res2.length; i++) {
 
                                                             if (res2[i].status == "ACCEPTED") {
@@ -488,7 +489,8 @@ module.exports = function (Job) {
                                                         }
                                                         for (let i = 0; i < res1.length; i++) {
                                                             if (res1[i].status == "STARTED") {
-
+                                                                console.log("res1[i].status", res1[i].status);
+                                                                console.log("data.timeZone ", data.timeZone );
                                                                 let weekDay = getDay(new Date(res1[i].postedDate).getDay());
                                                                 let time = new Date(res1[i].postedDate).toLocaleString("en-US", { timeZone: data.timeZone }, { hour: 'numeric', minute: 'numeric', hour12: true });
                                                                 if (time) {
@@ -3161,267 +3163,277 @@ module.exports = function (Job) {
                 cb(null, response);
             }
             else {
-                Job.app.models.declinedJobs.find({ where: { jobId: data.id } }, (err2, res2) => {
-                    if (err2) {
-                        response.type = "Error";
-                        response.message = er2;
-                        cb(null, response);
-                    }
-                    else {
-                        if (res2.length > 0) {
-                            if (res[0].worker && res[0].worker.id) {
-                                for (let i = 0; i < res2.length; i++) {
-                                    if (res2[i].jobId == data.id && res2[i].workerId == data.workerId) {
-                                        res[0].status = res2[i].status;
-                                        break;
-                                    }
-                                }
-                                response.type = "Success";
-                                response.message = res;
-                                cb(null, response);
-                            }
-                            else {
-                                response.type = "Success";
-                                response.message = res;
-                                cb(null, response);
-                            }
-
-
-
+                if(res && res.length && res.length>0)
+                {
+                    Job.app.models.declinedJobs.find({ where: { jobId: data.id } }, (err2, res2) => {
+                        if (err2) {
+                            response.type = "Error";
+                            response.message = er2;
+                            cb(null, response);
                         }
                         else {
-
-                            if (res && res[0].worker) {
-                                Job.app.models.favoriteSp.find({ where: { and: [{ workerId: res[0].worker.id }, { customerId: res[0].customer.id }] } }, (finalError, finalSuucess) => {
-                                    if (finalError) {
-                                        response.type = "Error";
-                                        response.message = finalError;
-                                        cb(null, response);
+                            if (res2.length > 0) {
+                                if (res[0].worker && res[0].worker.id) {
+                                    for (let i = 0; i < res2.length; i++) {
+                                        if (res2[i].jobId == data.id && res2[i].workerId == data.workerId) {
+                                            res[0].status = res2[i].status;
+                                            break;
+                                        }
                                     }
-                                    else {
-                                        if (finalSuucess.length > 0) {
-                                            for (let i = 0; i < finalSuucess.length; i++) {
-                                                if (finalSuucess[i].customerId == res[0].customerId && finalSuucess[i].workerId == res[0].workerId) {
-                                                    res[0].IsFavouriteWorker = true;
-                                                    break;
-                                                }
-                                                else {
-                                                    res[0].IsFavouriteWorker = false;
-                                                }
-                                            }
-                                            // res[0].IsFavouriteWorker = true;
+                                    response.type = "Success";
+                                    response.message = res;
+                                    cb(null, response);
+                                }
+                                else {
+                                    response.type = "Success";
+                                    response.message = res;
+                                    cb(null, response);
+                                }
+
+
+
+                            }
+                            else {
+
+                                if (res && res[0].worker) {
+                                    Job.app.models.favoriteSp.find({ where: { and: [{ workerId: res[0].worker.id }, { customerId: res[0].customer.id }] } }, (finalError, finalSuucess) => {
+                                        if (finalError) {
+                                            response.type = "Error";
+                                            response.message = finalError;
+                                            cb(null, response);
                                         }
                                         else {
-                                            res[0].IsFavouriteWorker = false;
-                                        }
-
-                                        if (res[0].status == 'JOBSTARTED') {
-
-                                            Job.app.models.jobstartTime.find({ where: { jobId: data.id } }, (err6, res6) => {
-                                                if (err6) {
-                                                    response.type = "Error";
-                                                    response.message = err6;
-                                                    cb(null, response);
-                                                }
-                                                else {
-                                                    if (res6.length > 0) {
-                                                        res[0].jobStartTime = res6[0].startTime;
-                                                        res[0].jobEndTime = res6[0].endTime;
-                                                        Job.app.models.Rating.find({ where: { IsWorkerSender: 1, customerId: res[0].customerId } }, (err1, customerRatingList) => {
-                                                            if (err1) {
-                                                                response.type = "Error";
-                                                                response.message = err1;
-                                                                cb(null, response);
-                                                            }
-                                                            else {
-                                                                if (customerRatingList.length > 0) {
-                                                                    let rating;
-                                                                    for (let i = 0; i < customerRatingList.length; i++) {
-                                                                        if (rating) {
-                                                                            rating = rating + Number(customerRatingList[i].rating);
-                                                                        }
-                                                                        else {
-                                                                            rating = Number(customerRatingList[i].rating);
-                                                                        }
-                                                                        rating = rating / (customerRatingList.length);
-                                                                    }
-                                                                    res[0].customerRating = rating;
-                                                                }
-                                                                else {
-                                                                    res[0].customerRating = "0";
-                                                                }
-
-                                                                Job.app.models.Rating.find({ where: { IsWorkerSender: 0, workerId: res[0].workerId } }, (err2, workerRatingList) => {
-                                                                    if (err2) {
-                                                                        response.type = "Error";
-                                                                        response.message = err2;
-                                                                        cb(null, response);
-                                                                    }
-                                                                    else {
-                                                                        if (workerRatingList.length > 0) {
-                                                                            let rating;
-                                                                            for (let i = 0; i < workerRatingList.length; i++) {
-                                                                                if (rating) {
-                                                                                    rating = rating + Number(workerRatingList[i].rating);
-                                                                                }
-                                                                                else {
-                                                                                    rating = Number(workerRatingList[i].rating);
-                                                                                }
-                                                                            }
-                                                                            rating = rating / (workerRatingList.length)
-                                                                            res[0].workerRating = rating;
-                                                                        }
-                                                                        else {
-                                                                            res[0].workerRating = "0";
-                                                                        }
-                                                                        response.type = "Success";
-                                                                        response.message = res;
-                                                                        cb(null, response);
-                                                                    }
-                                                                })
-
-
-                                                            }
-                                                        });
+                                            if (finalSuucess.length > 0) {
+                                                for (let i = 0; i < finalSuucess.length; i++) {
+                                                    if (finalSuucess[i].customerId == res[0].customerId && finalSuucess[i].workerId == res[0].workerId) {
+                                                        res[0].IsFavouriteWorker = true;
+                                                        break;
                                                     }
                                                     else {
-                                                        Job.app.models.Rating.find({ where: { IsWorkerSender: 1, customerId: res[0].customerId } }, (err1, customerRatingList) => {
-                                                            if (err1) {
-                                                                response.type = "Error";
-                                                                response.message = err1;
-                                                                cb(null, response);
-                                                            }
-                                                            else {
-                                                                if (customerRatingList.length > 0) {
-                                                                    let rating;
-                                                                    for (let i = 0; i < customerRatingList.length; i++) {
-                                                                        if (rating) {
-                                                                            rating = rating + Number(customerRatingList[i].rating);
-                                                                        }
-                                                                        else {
-                                                                            rating = Number(customerRatingList[i].rating);
-                                                                        }
-                                                                        rating = rating / (customerRatingList.length);
-                                                                    }
-                                                                    res[0].customerRating = rating;
-                                                                }
-                                                                else {
-                                                                    res[0].customerRating = "0";
-                                                                }
-
-                                                                Job.app.models.Rating.find({ where: { IsWorkerSender: 0, workerId: res[0].workerId } }, (err2, workerRatingList) => {
-                                                                    if (err2) {
-                                                                        response.type = "Error";
-                                                                        response.message = err2;
-                                                                        cb(null, response);
-                                                                    }
-                                                                    else {
-                                                                        if (workerRatingList.length > 0) {
-                                                                            let rating;
-                                                                            for (let i = 0; i < workerRatingList.length; i++) {
-                                                                                if (rating) {
-                                                                                    rating = rating + Number(workerRatingList[i].rating);
-                                                                                }
-                                                                                else {
-                                                                                    rating = Number(workerRatingList[i].rating);
-                                                                                }
-                                                                            }
-                                                                            rating = rating / (workerRatingList.length)
-                                                                            res[0].workerRating = rating;
-                                                                        }
-                                                                        else {
-                                                                            res[0].workerRating = "0";
-                                                                        }
-                                                                        response.type = "Success";
-                                                                        response.message = res;
-                                                                        cb(null, response);
-                                                                    }
-                                                                })
-
-
-                                                            }
-                                                        });
+                                                        res[0].IsFavouriteWorker = false;
                                                     }
                                                 }
-                                            })
-                                        }
-                                        else {
+                                                // res[0].IsFavouriteWorker = true;
+                                            }
+                                            else {
+                                                res[0].IsFavouriteWorker = false;
+                                            }
 
-                                            if (res[0].status != 'CANCELLED') {
-                                                Job.app.models.Rating.find({ where: { IsWorkerSender: 1, customerId: res[0].customerId } }, (err1, customerRatingList) => {
-                                                    if (err1) {
+                                            if (res[0].status == 'JOBSTARTED') {
+
+                                                Job.app.models.jobstartTime.find({ where: { jobId: data.id } }, (err6, res6) => {
+                                                    if (err6) {
                                                         response.type = "Error";
-                                                        response.message = err1;
+                                                        response.message = err6;
                                                         cb(null, response);
                                                     }
                                                     else {
-
-                                                        if (customerRatingList.length > 0) {
-                                                            let rating;
-                                                            for (let i = 0; i < customerRatingList.length; i++) {
-                                                                if (rating) {
-                                                                    rating = rating + Number(customerRatingList[i].rating);
+                                                        if (res6.length > 0) {
+                                                            res[0].jobStartTime = res6[0].startTime;
+                                                            res[0].jobEndTime = res6[0].endTime;
+                                                            Job.app.models.Rating.find({ where: { IsWorkerSender: 1, customerId: res[0].customerId } }, (err1, customerRatingList) => {
+                                                                if (err1) {
+                                                                    response.type = "Error";
+                                                                    response.message = err1;
+                                                                    cb(null, response);
                                                                 }
                                                                 else {
-                                                                    rating = Number(customerRatingList[i].rating);
-                                                                }
-                                                                rating = rating / (customerRatingList.length);
-                                                            }
-                                                            res[0].customerRating = rating;
-                                                        }
-                                                        else {
-                                                            res[0].customerRating = "0";
-                                                        }
+                                                                    if (customerRatingList.length > 0) {
+                                                                        let rating;
+                                                                        for (let i = 0; i < customerRatingList.length; i++) {
+                                                                            if (rating) {
+                                                                                rating = rating + Number(customerRatingList[i].rating);
+                                                                            }
+                                                                            else {
+                                                                                rating = Number(customerRatingList[i].rating);
+                                                                            }
+                                                                            rating = rating / (customerRatingList.length);
+                                                                        }
+                                                                        res[0].customerRating = rating;
+                                                                    }
+                                                                    else {
+                                                                        res[0].customerRating = "0";
+                                                                    }
 
-                                                        Job.app.models.Rating.find({ where: { IsWorkerSender: 0, workerId: res[0].workerId } }, (err2, workerRatingList) => {
-                                                            if (err2) {
-                                                                response.type = "Error";
-                                                                response.message = err2;
-                                                                cb(null, response);
-                                                            }
-                                                            else {
-                                                                if (workerRatingList.length > 0) {
-                                                                    let rating;
-                                                                    for (let i = 0; i < workerRatingList.length; i++) {
-                                                                        if (rating) {
-                                                                            rating = rating + Number(workerRatingList[i].rating);
+                                                                    Job.app.models.Rating.find({ where: { IsWorkerSender: 0, workerId: res[0].workerId } }, (err2, workerRatingList) => {
+                                                                        if (err2) {
+                                                                            response.type = "Error";
+                                                                            response.message = err2;
+                                                                            cb(null, response);
                                                                         }
                                                                         else {
-                                                                            rating = Number(workerRatingList[i].rating);
+                                                                            if (workerRatingList.length > 0) {
+                                                                                let rating;
+                                                                                for (let i = 0; i < workerRatingList.length; i++) {
+                                                                                    if (rating) {
+                                                                                        rating = rating + Number(workerRatingList[i].rating);
+                                                                                    }
+                                                                                    else {
+                                                                                        rating = Number(workerRatingList[i].rating);
+                                                                                    }
+                                                                                }
+                                                                                rating = rating / (workerRatingList.length)
+                                                                                res[0].workerRating = rating;
+                                                                            }
+                                                                            else {
+                                                                                res[0].workerRating = "0";
+                                                                            }
+                                                                            response.type = "Success";
+                                                                            response.message = res;
+                                                                            cb(null, response);
                                                                         }
-                                                                    }
-                                                                    rating = rating / (workerRatingList.length)
-                                                                    res[0].workerRating = rating;
+                                                                    })
+
+
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            Job.app.models.Rating.find({ where: { IsWorkerSender: 1, customerId: res[0].customerId } }, (err1, customerRatingList) => {
+                                                                if (err1) {
+                                                                    response.type = "Error";
+                                                                    response.message = err1;
+                                                                    cb(null, response);
                                                                 }
                                                                 else {
-                                                                    res[0].workerRating = "0";
+                                                                    if (customerRatingList.length > 0) {
+                                                                        let rating;
+                                                                        for (let i = 0; i < customerRatingList.length; i++) {
+                                                                            if (rating) {
+                                                                                rating = rating + Number(customerRatingList[i].rating);
+                                                                            }
+                                                                            else {
+                                                                                rating = Number(customerRatingList[i].rating);
+                                                                            }
+                                                                            rating = rating / (customerRatingList.length);
+                                                                        }
+                                                                        res[0].customerRating = rating;
+                                                                    }
+                                                                    else {
+                                                                        res[0].customerRating = "0";
+                                                                    }
+
+                                                                    Job.app.models.Rating.find({ where: { IsWorkerSender: 0, workerId: res[0].workerId } }, (err2, workerRatingList) => {
+                                                                        if (err2) {
+                                                                            response.type = "Error";
+                                                                            response.message = err2;
+                                                                            cb(null, response);
+                                                                        }
+                                                                        else {
+                                                                            if (workerRatingList.length > 0) {
+                                                                                let rating;
+                                                                                for (let i = 0; i < workerRatingList.length; i++) {
+                                                                                    if (rating) {
+                                                                                        rating = rating + Number(workerRatingList[i].rating);
+                                                                                    }
+                                                                                    else {
+                                                                                        rating = Number(workerRatingList[i].rating);
+                                                                                    }
+                                                                                }
+                                                                                rating = rating / (workerRatingList.length)
+                                                                                res[0].workerRating = rating;
+                                                                            }
+                                                                            else {
+                                                                                res[0].workerRating = "0";
+                                                                            }
+                                                                            response.type = "Success";
+                                                                            response.message = res;
+                                                                            cb(null, response);
+                                                                        }
+                                                                    })
+
+
                                                                 }
-                                                                response.type = "Success";
-                                                                response.message = res;
-                                                                cb(null, response);
-                                                            }
-                                                        })
-
-
+                                                            });
+                                                        }
                                                     }
-                                                });
+                                                })
                                             }
                                             else {
-                                                response.type = "Success";
-                                                response.message = res;
-                                                cb(null, response);
-                                            }
 
+                                                if (res[0].status != 'CANCELLED') {
+                                                    Job.app.models.Rating.find({ where: { IsWorkerSender: 1, customerId: res[0].customerId } }, (err1, customerRatingList) => {
+                                                        if (err1) {
+                                                            response.type = "Error";
+                                                            response.message = err1;
+                                                            cb(null, response);
+                                                        }
+                                                        else {
+
+                                                            if (customerRatingList.length > 0) {
+                                                                let rating;
+                                                                for (let i = 0; i < customerRatingList.length; i++) {
+                                                                    if (rating) {
+                                                                        rating = rating + Number(customerRatingList[i].rating);
+                                                                    }
+                                                                    else {
+                                                                        rating = Number(customerRatingList[i].rating);
+                                                                    }
+                                                                    rating = rating / (customerRatingList.length);
+                                                                }
+                                                                res[0].customerRating = rating;
+                                                            }
+                                                            else {
+                                                                res[0].customerRating = "0";
+                                                            }
+
+                                                            Job.app.models.Rating.find({ where: { IsWorkerSender: 0, workerId: res[0].workerId } }, (err2, workerRatingList) => {
+                                                                if (err2) {
+                                                                    response.type = "Error";
+                                                                    response.message = err2;
+                                                                    cb(null, response);
+                                                                }
+                                                                else {
+                                                                    if (workerRatingList.length > 0) {
+                                                                        let rating;
+                                                                        for (let i = 0; i < workerRatingList.length; i++) {
+                                                                            if (rating) {
+                                                                                rating = rating + Number(workerRatingList[i].rating);
+                                                                            }
+                                                                            else {
+                                                                                rating = Number(workerRatingList[i].rating);
+                                                                            }
+                                                                        }
+                                                                        rating = rating / (workerRatingList.length)
+                                                                        res[0].workerRating = rating;
+                                                                    }
+                                                                    else {
+                                                                        res[0].workerRating = "0";
+                                                                    }
+                                                                    response.type = "Success";
+                                                                    response.message = res;
+                                                                    cb(null, response);
+                                                                }
+                                                            })
+
+
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    response.type = "Success";
+                                                    response.message = res;
+                                                    cb(null, response);
+                                                }
+
+                                            }
                                         }
-                                    }
-                                })
+                                    })
+                                }
+
                             }
 
+
                         }
-
-
-                    }
-                })
+                    })
+                }
+                else
+                {
+                    response.type="Error";
+                    response.message="No job details found.";
+                    cb(null, response);
+                }
+                
 
             }
         })
@@ -3891,6 +3903,62 @@ module.exports = function (Job) {
 
 
 
+  Job.deleteJobandSendMail = function (data, cb) {
+    var response = {};
+      Job.app.models.Customer.findById(data.customerId, (custErr, custRes)=>{
+      if (custErr)
+      {
+        response.type = "Error";
+        response.message = custErr;
+        cb(null, response);
+      }
+      else
+      {
+        var to = custRes.email;
+        var subject = 'Your job Deleted By Admin';
+        var text = 'text';
+        var html = 'Hi,<br>Your job has been deleted by Admin. Please contact admin for details.<br><br>Regards,<br>Krew Team';
+        if (data.id) {
+            Job.destroyById(data.id, (err, res) => {
+            if (err) {
+              response.type = "Error";
+              response.message = err;
+              cb(null, response);
+            }
+            else {
+              response.type = "Success";
+              response.message = res;
+                Job.app.models.Customer.sendEmail(to, subject, text, html, function (cb) {
+
+              });
+              cb(null, response);
+            }
+          })
+           
+        }
+        else {
+          response.type = "Error";
+          response.message = "Please select the agent to delete.";
+          cb(null, response);
+        }
+      }
+    })
+   
+
+
+  }
+
+    Job.remoteMethod('deleteJobandSendMail', {
+    http: { path: '/deleteJobandSendMail', verb: 'POST' },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
 
 
 }                                         

@@ -350,6 +350,7 @@ module.exports = function (Worker) {
                       cb(null, response);
                     }
                     else {
+                      console.log("pragati");
                       Worker.app.models.declinedJobs.find({ "where": { "workerId": data.workerId }, include: ["service", "job", "currency"] }, (err3, res3) => {
                         if (err3) {
                           response.type = "Error";
@@ -368,6 +369,33 @@ module.exports = function (Worker) {
                                 jobs.cancelledJobs.push(res3[i]);
                               }
 
+                            }
+                            for (let j = 0; j < res2.length; j++) {
+                              if (res2[j].status == "ACCEPTED") {
+                                let index;
+                                for (let k = 0; k < jobs.declinedJobs.length; k++) {
+                                  if (jobs.declinedJobs[k].jobId == res2[j].id && jobs.declinedJobs[k].workerId == res2[j].workerId) {
+                                    index = k;
+                                  }
+                                }
+                                if (index || index == 0) { }
+                                else {
+                                  // const postedDate = new Date(res2[j].postedDate);
+                                  // const difference_ms = postedDate.getTime() - toDaysDate.getTime();
+                                  // const days = Math.round(difference_ms / one_day);
+                                  // if (days <= 1) {
+                                  //     jobs.acceptedJobs.push(res2[j]);
+                                  // }
+                                  jobs.acceptedJobs.push(res2[j]);
+
+                                }
+                              }
+                              else if (res2[j].status == "COMPLETED") {
+                                jobs.completedJobs.push(res2[j]);
+                              }
+                              else if (res2[j].status == "PAYPENDING" || res2[j].status == "ONMYWAY" || res2[j].status == "JOBSTARTED" || res2[j].status == "FOLLOWEDUP") {
+                                jobs.onGoingJobs.push(res2[j]);
+                              }
                             }
                             for (let i = 0; i < res1.length; i++) {
                               if (res1[i].status == "STARTED") {
@@ -395,14 +423,24 @@ module.exports = function (Worker) {
 
                                   }
 
+                                  //let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+
+                                  // console.log("weekDay", weekDay);
+                                  // console.log("time", time);
+                                  // console.log("timingRes.length", timingRes.length);
+
                                   for (var w = 0; w < timingRes.length; w++) {
                                     if (timingRes[w].timings) {
                                       for (var v = 0; v < timingRes[w].timings.length; v++) {
+                                        // console.log("timingRes[w].timings[v][weekDay", timingRes[w].timings[v][weekDay]);
                                         if (timingRes[w].timings[v][weekDay] == true) {
+                                          // console.log("time", time);
                                           if (timingRes[w].timings[v].time == time) {
                                             jobs.upcomingJobs.push(res1[i]);
 
                                           }
+                                          //finalJobData.push(timingRes[w].timings[v].time);
 
                                         }
                                       }
@@ -410,6 +448,7 @@ module.exports = function (Worker) {
 
                                   }
                                 }
+                                //jobs.upcomingJobs.push(res1[i]);
                               }
                             }
                             response.type = "Success";
@@ -417,9 +456,31 @@ module.exports = function (Worker) {
                             cb(null, response);
                           }
                           else {
+
+                            for (let i = 0; i < res2.length; i++) {
+
+                              if (res2[i].status == "ACCEPTED") {
+                                // const postedDate = new Date(res2[i].postedDate);
+                                // const difference_ms = postedDate.getTime() - toDaysDate.getTime();
+                                // const days = Math.round(difference_ms / one_day);
+                                // console.log("oneDay", days);
+                                // if (days <= 1) {
+                                //     jobs.acceptedJobs.push(res2[i]);
+                                // }
+                                jobs.acceptedJobs.push(res2[i]);
+
+                              }
+                              else if (res2[i].status == "ONMYWAY" || res2[i].status == "JOBSTARTED" || res2[i].status == "FOLLOWEDUP" || res2[i].status == "PAYPENDING") {
+                                jobs.onGoingJobs.push(res2[i]);
+                              }
+                              else if (res2[i].status == "COMPLETED") {
+                                jobs.completedJobs.push(res2[i]);
+                              }
+                            }
                             for (let i = 0; i < res1.length; i++) {
                               if (res1[i].status == "STARTED") {
-
+                                console.log("res1[i].status", res1[i].status);
+                                console.log("data.timeZone ", data.timeZone);
                                 let weekDay = getDay(new Date(res1[i].postedDate).getDay());
                                 let time = new Date(res1[i].postedDate).toLocaleString("en-US", { timeZone: data.timeZone }, { hour: 'numeric', minute: 'numeric', hour12: true });
                                 if (time) {
@@ -431,6 +492,10 @@ module.exports = function (Worker) {
                                   }
 
                                 }
+
+                                //let time = new Date(res1[i].postedDate).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+                                // time = time.replace(":00", '');
+                                // time = time.toLowerCase();
 
                                 for (var w = 0; w < timingRes.length; w++) {
                                   if (timingRes[w].timings) {
@@ -483,6 +548,62 @@ module.exports = function (Worker) {
       path: '/getJobCount',
       verb: 'POST'
     },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
+
+
+  Worker.deleteWorkerandSendMail = function (data, cb) {
+    var response = {};
+    Worker.findById(data.workerId, (custErr, custRes) => {
+      if (custErr) {
+        response.type = "Error";
+        response.message = custErr;
+        cb(null, response);
+      }
+      else {
+        var to = custRes.email;
+        var subject = 'Profile Deleted By Admin';
+        var text = 'text';
+        var html = 'Hi,<br>Your profile has been deleted by Admin. Please contact admin for details.<br><br>Regards,<br>Krew Team';
+        if (data.id) {
+          Worker.destroyById(data.id, (err, res) => {
+            if (err) {
+              response.type = "Error";
+              response.message = err;
+              cb(null, response);
+            }
+            else {
+              response.type = "Success";
+              response.message = res;
+              Worker.app.models.Customer.sendEmail(to, subject, text, html, function (cb) {
+
+              });
+              cb(null, response);
+            }
+          })
+
+        }
+        else {
+          response.type = "Error";
+          response.message = "Please select the agent to delete.";
+          cb(null, response);
+        }
+      }
+    })
+
+
+
+  }
+
+  Worker.remoteMethod('deleteWorkerandSendMail', {
+    http: { path: '/deleteWorkerandSendMail', verb: 'POST' },
     accepts: [
       {
         arg: 'data',

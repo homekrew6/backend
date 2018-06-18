@@ -399,5 +399,58 @@ module.exports = function (Customer) {
     ],
     returns: { arg: 'response', type: 'object' }
   });
+  Customer.deleteCustomerandSendMail = function (data, cb) {
+    var response = {};
+    Customer.findById(data.customerId, (custErr, custRes) => {
+      if (custErr) {
+        response.type = "Error";
+        response.message = custErr;
+        cb(null, response);
+      }
+      else {
+        var to = custRes.email;
+        var subject = 'Profile Deleted By Admin';
+        var text = 'text';
+        var html = 'Hi,<br>Your profile has been deleted by Admin. Please contact admin for details.<br><br>Regards,<br>Krew Team';
+        if (data.id) {
+          Customer.destroyById(data.id, (err, res) => {
+            if (err) {
+              response.type = "Error";
+              response.message = err;
+              cb(null, response);
+            }
+            else {
+              response.type = "Success";
+              response.message = res;
+              Customer.sendEmail(to, subject, text, html, function (cb) {
 
+              });
+              cb(null, response);
+            }
+          })
+
+        }
+        else {
+          response.type = "Error";
+          response.message = "Please select the agent to delete.";
+          cb(null, response);
+        }
+      }
+    })
+
+
+
+  }
+
+  Customer.remoteMethod('deleteCustomerandSendMail', {
+    http: { path: '/deleteCustomerandSendMail', verb: 'POST' },
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: { source: 'body' }
+      }
+    ],
+    returns: { arg: 'response', type: 'object' }
+  });
 };
